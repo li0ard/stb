@@ -1,6 +1,7 @@
-import { beltHmac } from "../beltHash/index.js";
 import { numberToBytesBE, type TArg } from "@noble/curves/utils.js";
+import { beltHmac } from "../hmac.js";
 
+/** Initialize OTP generator with BelT-HMAC */
 export const botp = (secret: TArg<Uint8Array>, codeLength: number = 6) => {
     const hotp = (counter: TArg<Uint8Array>): string => {
         const digest = beltHmac(secret, counter);
@@ -17,6 +18,6 @@ export const botp = (secret: TArg<Uint8Array>, codeLength: number = 6) => {
 
     return Object.freeze({
         hotp,
-        totp: (now: number = Date.now()): string => hotp(numberToBytesBE(Math.floor(now / 60), 8))
+        totp: (now: number): string => hotp(numberToBytesBE(Math.floor(now / 60), 8))
     });
 }

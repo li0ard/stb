@@ -1,21 +1,16 @@
-/**
- * Test vectors from STB 34.101.31 directly and from test procedures
- * "МЕТОДИКА ИСПЫТАНИЙ СРЕДСТВ КРИПТОГРАФИЧЕСКОЙ ЗАЩИТЫ 
- * ИНФОРМАЦИИ НА СООТВЕТСТВИЕ ТРЕБОВАНИЯМ СТБ 34.101.47-2017 МИ.10131.11.01"
- * https://www.oac.gov.by/public/content/files/files/stb/met-10147-11-01.pdf
- */
+
 import { describe, test, expect } from "bun:test";
 import { hexToBytes, type TRet } from "@noble/hashes/utils.js";
-import { beltHmac } from "./index";
-import { H } from "../belt/const";
+import { beltHmac } from "./hmac";
+import { H } from "./belt/const";
 
 const performTest = (
     key: Uint8Array,
     msg: Uint8Array,
     expected: Uint8Array
-) => expect(beltHmac(key, msg)).toStrictEqual(expected as TRet<Uint8Array>)
+) => expect(beltHmac(key, msg)).toStrictEqual(expected as TRet<Uint8Array>);
 
-describe("[BelT hash] HMAC", () => {
+describe("[HMAC] BelT hash", () => {
     test("#1", () => performTest(
         H.subarray(128,157),
         H.subarray(192,224),

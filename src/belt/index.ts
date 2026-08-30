@@ -44,10 +44,15 @@ export const keyTransform = (
     ))[1].slice(0, outputLen);
 }
 
+/** BelT (STB 34.101.31) cipher */
 export class Belt implements Cipher {
     readonly blockSize = 16;
     private ks: Uint32Array;
 
+    /**
+     * BelT (STB 34.101.31) cipher
+     * @param key Encryption key
+     */
     constructor(key: TArg<Uint8Array>) { this.ks = u32(keyExpand(key)); }
 
     encrypt(block: TArg<Uint8Array>): TRet<Uint8Array> {

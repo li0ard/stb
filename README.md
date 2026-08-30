@@ -20,7 +20,7 @@ npm i @li0ard/stb
 
 ## Supported algorithms
 
-- Curves and ECDSA (STB 34.101.45)
+- Bign curves and ECDSA (STB 34.101.45)
     - Determenistic signatures
     - Key transport algorithm
 - Bash hash function (STB 34.101.77)

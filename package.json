@@ -1,7 +1,36 @@
 {
   "name": "@li0ard/stb",
-  "module": "src/index.ts",
+   "version": "0.2.3",
+  "main": "index.js",
+  "types": "index.d.ts",
   "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./bash.js": "./bash/index.js",
+    "./belt.js": "./belt/index.js",
+    "./belthash.js": "./beltHash/index.js",
+    "./bign.js": "./bign/index.js",
+    "./brng.js": "./brng/index.js",
+    "./modes.js": "./modes/index.js",
+    "./hmac.js": "./hmac.js",
+    "./types.js": "./types.js"
+  },
+  "author": "li0ard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/li0ard/stb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/li0ard/stb/issues"
+  },
+  "homepage": "https://github.com/li0ard/stb#readme",
+  "funding": "https://li0ard.rest/donate",
+  "description": "STB cryptography algorithms in pure TypeScript",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf dist/ && tsc --project tsconfig.build.json",
+    "docs": "typedoc --options .config/typedoc/config.cjs"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -11,5 +40,10 @@
   "dependencies": {
     "@noble/curves": "^2.3.0",
     "@noble/hashes": "^2.3.0"
-  }
+  },
+  "files": ["**/*.js", "**/*.d.ts"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": ["stb", "crypto", "belt", "bash", "brng", "bign", "belthash"]
 }

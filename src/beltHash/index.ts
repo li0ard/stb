@@ -3,8 +3,8 @@ import { H } from "../belt/const.js";
 import { compress } from "../modes/compress.js";
 import { xorBytes } from "../utils.js";
 import { numberToBytesLE } from "@noble/curves/utils.js";
-import { _HMAC } from "@noble/hashes/hmac.js";
 
+/** BelT hash function */
 export class BeltHash implements Hash<BeltHash> {
     readonly blockLen = 32;
     readonly outputLen = 32;
@@ -86,11 +86,5 @@ export class BeltHash implements Hash<BeltHash> {
     static create() { return new BeltHash(); }
 }
 
+/** BelT hash function */
 export const beltHash = createHasher(BeltHash.create);
-
-export class BeltHMAC extends _HMAC<Hash<BeltHash>> {
-    constructor(key: TArg<Uint8Array>) { super(beltHash, key); }
-}
-
-export const beltHmac = (key: TArg<Uint8Array>, msg: TArg<Uint8Array>): TRet<Uint8Array> =>
-    new BeltHMAC(key).update(msg).digest();

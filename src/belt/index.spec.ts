@@ -1,3 +1,7 @@
+/**
+ * Test vectors from STB 34.101.31
+ * https://apmi.bsu.by/assets/files/std/belt-spec372.pdf
+ */
 import { hexToBytes } from "@noble/hashes/utils.js";
 import { describe, test, expect } from "bun:test";
 import { Belt, keyExpand, keyTransform } from ".";

@@ -110,7 +110,7 @@ export class Bash192 extends Bash<Bash192> {
     static create(): Bash192 { return new Bash192(); }
 }
 
-/** `Bash-512` hash function */
+/** `Bash-256` hash function */
 export class Bash256 extends Bash<Bash256> {
     constructor() { super(256); }
 
@@ -125,10 +125,10 @@ export class Bash256 extends Bash<Bash256> {
     static create(): Bash256 { return new Bash256(); }
 }
 
-/** `Bash-256` hash function */
+/** `Bash-128` hash function */
 export const bash128 = createHasher(Bash128.create);
-/** `Bash-384` hash function */
+/** `Bash-192` hash function */
 export const bash192 = createHasher(Bash192.create);
-/** `Bash-512` hash function */
+/** `Bash-256` hash function */
 export const bash256 = createHasher(Bash256.create);
 export * from "./prg.js";

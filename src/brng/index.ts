@@ -1,10 +1,12 @@
 import { concatBytes, copyBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { negBlock, xorBytes } from "../utils.js";
-import { beltHash, beltHmac } from "../beltHash/index.js";
+import { beltHash } from "../beltHash/index.js";
 import { bytesToNumberLE, numberToBytesLE } from "@noble/curves/utils.js";
+import { beltHmac } from "../hmac.js";
 
 const EMPTY = new Uint8Array(beltHash.outputLen);
 
+/** Initialize RNG with CTR mode */
 export const brngCtr = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>) => {
     const s = copyBytes(iv), r = negBlock(s);
 
@@ -30,6 +32,7 @@ export const brngCtr = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>) => {
     }
 }
 
+/** Initialize RNG with HMAC mode */
 export const brngHmac = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>) => {
     const r = beltHmac(key, iv);
 

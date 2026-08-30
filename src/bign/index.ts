@@ -6,6 +6,7 @@ import { wbl } from "../modes/wbl.js";
 import { randomBytes } from "@noble/hashes/utils.js";
 import { kwp } from "../modes/kwp.js";
 
+/** Creates Bign (STB 34.101.45) signing interface */
 export const bign = (parameters: BignCurveParameters) => {
     const Point = weierstrass(parameters);
     const { Fp, Fn, BASE } = Point;
@@ -14,6 +15,11 @@ export const bign = (parameters: BignCurveParameters) => {
 
     const _2l = 2n ** BigInt(length * 4);
 
+    /**
+     * Computes public key for a secret key. Checks for validity of the secret key.
+     * @param isCompressed - whether to return compact (default), or full key
+     * @returns Public key, full when `isCompressed=false`; short when `isCompressed=true`
+     */
     const getPublicKey = (
         secretKey: TArg<Uint8Array>, 
         isCompressed: boolean = true
@@ -37,6 +43,7 @@ export const bign = (parameters: BignCurveParameters) => {
         }
     }
 
+    /** Signs a message hash with a secret key */
     const sign = (
         privateKey: TArg<Uint8Array>,
         digest: TArg<Uint8Array>,
@@ -67,6 +74,7 @@ export const bign = (parameters: BignCurveParameters) => {
         return concatBytes(S0, S1);
     }
 
+    /** Verifies a signature against message hash and public key */
     const verify = (
         publicKey: TArg<Uint8Array>,
         digest: TArg<Uint8Array>,
@@ -97,6 +105,7 @@ export const bign = (parameters: BignCurveParameters) => {
         return equalBytes(S0, t);
     }
 
+    /** Wrap encryption key */
     const wrapKey = (
         publicKey: TArg<Uint8Array>,
         key: TArg<Uint8Array>,
@@ -113,6 +122,7 @@ export const bign = (parameters: BignCurveParameters) => {
         return concatBytes(R, kwp(theta, header).wrap(key));
     }
 
+    /** Unwrap encryption key */
     const unwrapKey = (
         privateKey: TArg<Uint8Array>,
         wrappedKey: TArg<Uint8Array>,
