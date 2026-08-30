@@ -10,12 +10,12 @@ export interface BignCurveParameters extends WeierstrassOpts<bigint> {
 
 /** BelT hash OID */
 export const BELTOID: Uint8Array = hexToBytes("06092A7000020022651F51");
-/** Bash 256 bit OID*/
-export const BASH256OID: Uint8Array = hexToBytes("06092A7000020022654D0B");
-/** Bash 384 bit OID*/
-export const BASH384OID: Uint8Array = hexToBytes("06092A7000020022654D0C");
-/** Bash 512 bit OID*/
-export const BASH512OID: Uint8Array = hexToBytes("06092A7000020022654D0D");
+/** Bash-128 OID*/
+export const BASH128OID: Uint8Array = hexToBytes("06092A7000020022654D0B");
+/** Bash-192 OID*/
+export const BASH192OID: Uint8Array = hexToBytes("06092A7000020022654D0C");
+/** Bash-256 OID*/
+export const BASH256OID: Uint8Array = hexToBytes("06092A7000020022654D0D");
 
 /** Bign curve 96v1 */
 export const BIGN96: Readonly<BignCurveParameters> = {

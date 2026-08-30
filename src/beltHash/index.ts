@@ -26,7 +26,7 @@ export class BeltHash implements Hash<BeltHash> {
         this.length = 0n;
     }
 
-    private processBlock(block: Uint8Array): void {
+    private processBlock(block: TArg<Uint8Array>) {
         const [t, h] = compress(concatBytes(block, this.h));
         this.s.set(xorBytes(this.s, t));
         this.h.set(h);
@@ -50,7 +50,7 @@ export class BeltHash implements Hash<BeltHash> {
         return this;
     }
 
-    digestInto(buf: TArg<Uint8Array>): void {
+    digestInto(buf: TArg<Uint8Array>) {
         if (this.pos > 0) {
             this.buffer.fill(0, this.pos);
             this.processBlock(this.buffer);

@@ -6,7 +6,7 @@
  */
 import { hexToBytes, type TRet } from "@noble/hashes/utils.js";
 import { describe, test, expect } from "bun:test";
-import { prgAead, prgHash } from ".";
+import { BashPrg, prgAead, prgHash } from ".";
 import { H } from "../belt/const";
 
 const ann1 = hexToBytes("06075316");
@@ -14,6 +14,7 @@ const vec1 = new Uint8Array();
 const vec2 = H.subarray(0, 127);
 const vec3 = H.subarray(0, 143);
 const vec4 = new TextEncoder().encode("Fifty four byte or four hundred thirty two bit message");
+
 describe("[CORE] Bash-PRG-HASH (STB 34.101.77)", () => {
     test("#1", () => {
         const expected = hexToBytes("36FA075EC15721F250B9A641A8CB99A333A9EE7BA8586D0646CBAC3686C03DF3");
@@ -194,4 +195,22 @@ describe("[CORE] Bash-PRG-AEAD (STB 34.101.77)", () => {
         EMPTY,
         hexToBytes("839A7287D0BBEE0231BB909AC24C3FDAFC9EA34921D29CBF97CCFD0902EC37ED")
     ));
+});
+
+test("[BASH-PRG] Test programm", () => {
+    const alpha = new BashPrg().start(
+        256, 2,
+        undefined,
+        H.subarray(0,32)
+    ).absorb(H.subarray(32, 127)).ratchet();
+
+    const K1 = alpha.squeeze(16);
+    const beta = new BashPrg().start(128, 1, H.subarray(128, 144), K1);
+
+    const gamma = beta.clone().restart(H.subarray(144,148));
+    const Y1 = beta.encrypt(H.subarray(160, 183));
+    const Y2 = gamma.encrypt(H.subarray(160, 183));
+
+    expect(Y1).toStrictEqual(hexToBytes("51ED3B28D345FFD1AD22815B86ECC17C278C8FE8920214"));
+    expect(Y2).toStrictEqual(hexToBytes("28FE0998BFC010F13B260685A27AFB36CCF580F753521B"));
 });

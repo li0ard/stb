@@ -1,7 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { hexToBytes, type TRet } from "@noble/hashes/utils.js";
 import { bign, bign128, bign192, bign256 } from ".";
-import { concatBytes } from "@noble/curves/utils.js";
 import { H } from "../belt/const";
 
 const performTest = (

@@ -80,9 +80,39 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     }
 }
 
-/** `Bash-256` hash function */
-export class Bash256 extends Bash<Bash256> {
+/** `Bash-128` hash function */
+export class Bash128 extends Bash<Bash128> {
     constructor() { super(128); }
+
+    _cloneInto(to?: Bash128): Bash128 {
+        to ||= new Bash128();
+        to.S.set(this.S);
+        to.pos = this.pos;
+
+        return to;
+    }
+
+    static create(): Bash128 { return new Bash128(); }
+}
+
+/** `Bash-192` hash function */
+export class Bash192 extends Bash<Bash192> {
+    constructor() { super(192); }
+
+    _cloneInto(to?: Bash192): Bash192 {
+        to ||= new Bash192();
+        to.S.set(this.S);
+        to.pos = this.pos;
+
+        return to;
+    }
+
+    static create(): Bash192 { return new Bash192(); }
+}
+
+/** `Bash-512` hash function */
+export class Bash256 extends Bash<Bash256> {
+    constructor() { super(256); }
 
     _cloneInto(to?: Bash256): Bash256 {
         to ||= new Bash256();
@@ -95,40 +125,10 @@ export class Bash256 extends Bash<Bash256> {
     static create(): Bash256 { return new Bash256(); }
 }
 
-/** `Bash-384` hash function */
-export class Bash384 extends Bash<Bash384> {
-    constructor() { super(192); }
-
-    _cloneInto(to?: Bash384): Bash384 {
-        to ||= new Bash384();
-        to.S.set(this.S);
-        to.pos = this.pos;
-
-        return to;
-    }
-
-    static create(): Bash384 { return new Bash384(); }
-}
-
-/** `Bash-512` hash function */
-export class Bash512 extends Bash<Bash512> {
-    constructor() { super(256); }
-
-    _cloneInto(to?: Bash512): Bash512 {
-        to ||= new Bash512();
-        to.S.set(this.S);
-        to.pos = this.pos;
-
-        return to;
-    }
-
-    static create(): Bash512 { return new Bash512(); }
-}
-
 /** `Bash-256` hash function */
-export const bash256 = createHasher(Bash256.create);
+export const bash128 = createHasher(Bash128.create);
 /** `Bash-384` hash function */
-export const bash384 = createHasher(Bash384.create);
+export const bash192 = createHasher(Bash192.create);
 /** `Bash-512` hash function */
-export const bash512 = createHasher(Bash512.create);
+export const bash256 = createHasher(Bash256.create);
 export * from "./prg.js";

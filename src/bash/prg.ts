@@ -4,13 +4,13 @@ import { bytesToUint64s, uint64sToBytes } from "../utils.js";
 import { equalBytes } from "@noble/curves/utils.js";
 import type { AEADMode } from "../types.js";
 
-const BASH_PRG_NULL = 0x01; // 000000 01
-const BASH_PRG_KEY  = 0x05; // 000001 01
-const BASH_PRG_DATA = 0x09; // 000010 01
-const BASH_PRG_TEXT = 0x0D; // 000011 01
-const BASH_PRG_OUT  = 0x11; // 000100 01
+const BASH_PRG_NULL = 0x01, // 000000 01
+    BASH_PRG_KEY  = 0x05, // 000001 01
+    BASH_PRG_DATA = 0x09, // 000010 01
+    BASH_PRG_TEXT = 0x0D, // 000011 01
+    BASH_PRG_OUT  = 0x11; // 000100 01
 
-const xorInPlace = (dst: Uint8Array, src: Uint8Array, len: number) => {
+const xorInPlace = (dst: TArg<Uint8Array>, src: TArg<Uint8Array>, len: number) => {
     for (let i = 0; i < len; i++) dst[i] ^= src[i];
 }
 
@@ -33,16 +33,29 @@ export class BashPrg {
         return 16 * (192 - this.buf_len) === this.l * (2 + this.d);
     }
 
-    private process(): void {
+    clone(): BashPrg {
+        const to = new BashPrg();
+        to.l = this.l;
+        to.d = this.d;
+        to.s.set(this.s);
+        to.pos = this.pos;
+        to.buf_len = this.buf_len;
+        to.started = this.started;
+
+        return to;
+    }
+
+    private process() {
         const words = bytesToUint64s(this.s);
         F(words);
         this.s.set(uint64sToBytes(words));
     }
 
-    private commit(code: number): void {
+    private commit(code: number) {
         if (!this.started)
             throw new Error("prg: Automaton isn't initialized");
-        if (this.pos >= this.buf_len) throw new Error("prg: pos >= buf_len");
+        if (this.pos >= this.buf_len)
+            throw new Error("prg: pos >= buf_len");
         this.s[this.pos] ^= code;
         this.s[this.buf_len] ^= 0x80;
         this.process();
@@ -111,8 +124,7 @@ export class BashPrg {
 
     absorb(buf: TArg<Uint8Array>): this {
         this.commit(BASH_PRG_DATA);
-        let off = 0;
-        let count = buf.length;
+        let off = 0, count = buf.length;
  
         if (count < this.buf_len - this.pos) {
             xorInPlace(this.s.subarray(this.pos), buf, count);
@@ -144,8 +156,7 @@ export class BashPrg {
     squeeze(count: number): TRet<Uint8Array> {
         this.commit(BASH_PRG_OUT);
         const out = new Uint8Array(count);
-        let off = 0;
-        let remaining = count;
+        let off = 0, remaining = count;
  
         if (remaining < this.buf_len - this.pos) {
             out.set(this.s.subarray(this.pos, this.pos + remaining));
@@ -175,8 +186,7 @@ export class BashPrg {
             throw new Error("prg: encrypt is for key-mode only");
         this.commit(BASH_PRG_TEXT);
         const out = new Uint8Array(buf.length);
-        let off = 0;
-        let count = buf.length;
+        let off = 0, count = buf.length;
  
         if (count < this.buf_len - this.pos) {
             xorInPlace(this.s.subarray(this.pos), buf, count);
@@ -218,8 +228,7 @@ export class BashPrg {
             throw new Error("prg: decrypt is for key-mode only");
         this.commit(BASH_PRG_TEXT);
         const out = new Uint8Array(buf.length);
-        let off = 0;
-        let count = buf.length;
+        let off = 0, count = buf.length;
  
         if (count < this.buf_len - this.pos) {
             for (let i = 0; i < count; i++) out[i] = buf[i] ^ this.s[this.pos + i];
@@ -255,7 +264,7 @@ export class BashPrg {
     ratchet(): this {
         const t = copyBytes(this.s);
         this.commit(BASH_PRG_NULL);
-        for (let i = 0; i < 192; i++) this.s[i] ^= t[i];
+        xorInPlace(this.s, t, this.s.length);
 
         return this;
     }
