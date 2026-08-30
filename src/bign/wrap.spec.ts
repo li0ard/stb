@@ -1,0 +1,53 @@
+import { describe, test, expect } from "bun:test";
+import { hexToBytes, type TRet } from "@noble/hashes/utils.js";
+import { bign, bign128, bign192, bign256 } from ".";
+import { concatBytes } from "@noble/curves/utils.js";
+import { H } from "../belt/const";
+
+const performTest = (
+    curve: ReturnType<typeof bign>,
+    privateKey: Uint8Array,
+    transportedKey: Uint8Array,
+    header: Uint8Array,
+    rand: Uint8Array,
+    expectedWrapped: Uint8Array
+) => {
+    const wrapped = curve.wrapKey(
+        curve.getPublicKey(privateKey, false),
+        transportedKey,
+        header,
+        rand
+    );
+
+    expect(wrapped).toStrictEqual(expectedWrapped as TRet<Uint8Array>);
+    expect(curve.unwrapKey(privateKey, wrapped, header)).toStrictEqual(transportedKey as TRet<Uint8Array>);
+}
+
+describe("[BIGN] Key transport", () => {
+    test("#1", () => performTest(
+        bign128,
+        hexToBytes("1F66B5B84B7339674533F0329C74F21834281FED0732429E0C79235FC273E269"),
+        H.subarray(0, 18),
+        hexToBytes("5BE3D61217B96181FE6786AD716B890B"),
+        hexToBytes("0F51D91347617C20BD4AB07AEF4F26A1AD1362A8F9A3D42FBE1B8E6F1C88AAD5"),
+        hexToBytes("9B4EA669DABDF100A7D4B6E6EB76EE5251912531F426750AAC8A9DBB51C54D8DEB9289B50A46952D0531861E45A8814B008FDC65DE9FF1FA2A1F16B6A280E957A814")
+    ));
+
+    test("#2", () => performTest(
+        bign192,
+        hexToBytes("84C21DBF7B3C2372DC21386C216FA16C9EF10AEAF9F96A872FD8058F2780BA930F08BE3BEC80416137E11A232D93B50E"),
+        H.subarray(1, 19),
+        hexToBytes("E3D61217B96181FE6786AD716B890B5C"),
+        hexToBytes("2B4F71DBD8E70AA117BFA30765AFA93469D3161509B10406A2A0860F9DC98C5091CFDD4E4B3B6462B6B2EFCB9B1FED44"),
+        hexToBytes("BBADA0BA582EEB29C794544AAE2D212BB4A97B119A70EB1A58975C25B0AE4CE2C18AF138158EB3471945D9B9A6BEEA968E4D0BC696566FE4464406AF5EB4CCCB35A7E5F96B1819FECA94DA5FC139366BC894")
+    ));
+
+    test("#3", () => performTest(
+        bign256,
+        hexToBytes("BEC096353EF4568AA417622A95F2B56333BF3A02040B31372FD5737DE0F1A2BA6090C1D1A27155D8711FFE5B310278471B0B97CF1B8FE821C50205E5D24AB9B8"),
+        H.subarray(2, 20),
+        hexToBytes("D61217B96181FE6786AD716B890B5CB0"),
+        hexToBytes("52BD332696B49E3379F15D736AC05F3927B8A02A5577642C39E5DA848D0C4BE6DFA5DFCB0BBBF7DCD7232EEA5F50E18CAC8A94A1B5C55F69DB08C56CE06053AA"),
+        hexToBytes("6F50014D62076605391205E1DDD6111550ED6190563C93D98AEEDC2BE9A7B8462C156F779F78B5A99D8AC7DC84DFFFB7450DF15A4D44970EED577A30864B2A1C12D44891676D81108F57277F4E66E1063552E36CB22825638711548E701A22F65835")
+    ));
+});
