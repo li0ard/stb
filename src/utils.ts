@@ -1,7 +1,7 @@
 import { bytesToNumberBE, numberToBytesBE } from "@noble/curves/utils.js";
 import type { TArg, TRet } from "@noble/hashes/utils.js";
 
-export const bytesToUint64s = (b: TArg<Uint8Array>): TRet<BigUint64Array> => {
+export const bytesToUint64sBE = (b: TArg<Uint8Array>): TRet<BigUint64Array> => {
     const size = Math.floor(b.length / 8);
     const result = new BigUint64Array(size);
     
@@ -9,7 +9,7 @@ export const bytesToUint64s = (b: TArg<Uint8Array>): TRet<BigUint64Array> => {
     return result;
 }
 
-export const uint64sToBytes = (w: TArg<BigUint64Array>): TRet<Uint8Array> => {
+export const uint64sToBytesBE = (w: TArg<BigUint64Array>): TRet<Uint8Array> => {
     const result = new Uint8Array(w.length * 8);
     for (let i = 0; i < w.length; i++) result.set(numberToBytesBE(w[i], 8), i * 8);
     return result;

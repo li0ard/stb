@@ -1,6 +1,6 @@
 {
   "name": "@li0ard/stb",
-   "version": "0.2.3",
+  "version": "0.2.3",
   "main": "index.js",
   "types": "index.d.ts",
   "type": "module",
@@ -35,11 +35,11 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@noble/curves": "^2.3.0",
-    "@noble/hashes": "^2.3.0"
+    "@noble/curves": "^2.4.0",
+    "@noble/hashes": "^2.4.0"
   },
   "files": ["**/*.js", "**/*.d.ts"],
   "publishConfig": {

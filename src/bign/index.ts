@@ -1,19 +1,19 @@
 import { weierstrass } from "@noble/curves/abstract/weierstrass.js";
 import { BELTOID, BIGN128, BIGN192, BIGN256, type BignCurveParameters } from "./const.js";
-import { bytesToNumberBE, bytesToNumberLE, concatBytes, equalBytes, numberToBytesBE, numberToBytesLE, type TArg, type TRet } from "@noble/curves/utils.js";
+import { randomBytes, bytesToNumberBE, bytesToNumberLE, concatBytes, equalBytes, numberToBytesBE, numberToBytesLE, type TArg, type TRet } from "@noble/curves/utils.js";
 import { beltHash } from "../beltHash/index.js";
-import { wbl } from "../modes/wbl.js";
-import { randomBytes } from "@noble/hashes/utils.js";
-import { kwp } from "../modes/kwp.js";
+import { wbl, kwp } from "../modes/index.js";
+import { Field } from "@noble/curves/abstract/modular.js";
 
 /** Creates Bign (STB 34.101.45) signing interface */
 export const bign = (parameters: BignCurveParameters) => {
-    const Point = weierstrass(parameters);
-    const { Fp, Fn, BASE } = Point;
-    const { length, n, a, b } = parameters;
-    const hlength = parameters.length / 2;
-
-    const _2l = 2n ** BigInt(length * 4);
+    const Fp = Field(parameters.p, { isLE: true }),
+        Fn = Field(parameters.n, { isLE: true }),
+        Point = weierstrass(parameters, { Fp, Fn }),
+        { BASE } = Point;
+    const { length, n, a, b } = parameters,
+        hlength = parameters.length / 2,
+        _2l = 2n ** BigInt(length * 4);
 
     /**
      * Computes public key for a secret key. Checks for validity of the secret key.
@@ -23,14 +23,14 @@ export const bign = (parameters: BignCurveParameters) => {
     const getPublicKey = (
         secretKey: TArg<Uint8Array>, 
         isCompressed: boolean = true
-    ): TRet<Uint8Array> => BASE.multiply(bytesToNumberLE(secretKey)).toBytes(isCompressed);
+    ): TRet<Uint8Array> => BASE.multiply(Fn.fromBytes(secretKey)).toBytes(isCompressed);
 
     const drbg = (
-        privateKey: TArg<Uint8Array>,
+        secretKey: TArg<Uint8Array>,
         digest: TArg<Uint8Array>,
         oid: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
-        const theta = beltHash(concatBytes(oid, privateKey));
+        const theta = beltHash.create().update(oid).update(secretKey).digest();
         let kBytes = new Uint8Array(digest);
 
         const mode = wbl(theta);
@@ -45,30 +45,29 @@ export const bign = (parameters: BignCurveParameters) => {
 
     /** Signs a message hash with a secret key */
     const sign = (
-        privateKey: TArg<Uint8Array>,
+        secretKey: TArg<Uint8Array>,
         digest: TArg<Uint8Array>,
         oid?: TArg<Uint8Array>,
         rand?: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
         oid ??= BELTOID;
-        const k = bytesToNumberLE(rand ?? drbg(privateKey, digest, oid));
+        const k = bytesToNumberLE(rand ?? drbg(secretKey, digest, oid));
         const R = BASE.multiply(k).x;
-        
-        const S0 = beltHash(concatBytes(
-            oid,
-            numberToBytesLE(R, length),
-            digest
-        )).subarray(0, hlength);
 
-        const S1 = numberToBytesLE(
+        const S0 = beltHash.create()
+            .update(oid)
+            .update(Fp.toBytes(R))
+            .update(digest)
+            .digest().subarray(0, hlength)
+
+        const S1 = Fn.toBytes(
             Fn.sub(
                 Fn.sub(k, bytesToNumberLE(digest)),
                 Fn.mul(
-                    bytesToNumberLE(privateKey),
+                    Fn.fromBytes(secretKey),
                     Fn.add(bytesToNumberLE(S0), _2l)
                 )
-            ),
-            length
+            )
         );
 
         return concatBytes(S0, S1);
@@ -96,11 +95,11 @@ export const bign = (parameters: BignCurveParameters) => {
         );
         if(R.is0()) return false;
 
-        const t = beltHash(concatBytes(
-            oid,
-            numberToBytesLE(R.x, length),
-            digest
-        )).subarray(0, hlength);
+        const t = beltHash.create()
+            .update(oid)
+            .update(Fp.toBytes(R.x))
+            .update(digest)
+            .digest().subarray(0, hlength)
 
         return equalBytes(S0, t);
     }
@@ -113,11 +112,8 @@ export const bign = (parameters: BignCurveParameters) => {
         rand?: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
         const k = Fn.create(bytesToNumberLE(rand ?? randomBytes(Fn.BYTES)));
-        const R = numberToBytesLE(BASE.multiply(k).x, length);
-        const theta = numberToBytesLE(
-            Point.fromBytes(publicKey).multiply(k).x,
-            length
-        ).subarray(0, 32);
+        const R = Fp.toBytes(BASE.multiply(k).x);
+        const theta = Fp.toBytes(Point.fromBytes(publicKey).multiply(k).x).subarray(0, 32);
 
         return concatBytes(R, kwp(theta, header).wrap(key));
     }
@@ -142,10 +138,7 @@ export const bign = (parameters: BignCurveParameters) => {
         const R = Point.fromAffine({ x,y });
         R.assertValidity();
 
-        const theta = numberToBytesLE(
-            R.multiply(bytesToNumberLE(privateKey)).x,
-            length
-        ).subarray(0, 32);
+        const theta = Fp.toBytes(R.multiply(Fn.fromBytes(privateKey)).x).subarray(0, 32);
 
         return kwp(theta, header).unwrap(ct);
     }

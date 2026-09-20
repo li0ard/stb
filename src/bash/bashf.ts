@@ -1,5 +1,5 @@
 import type { TArg } from "@noble/hashes/utils.js";
-import { bytesToUint64s, uint64sToBytes } from "../utils.js";
+import { bytesToUint64sBE, uint64sToBytesBE } from "../utils.js";
 
 const ITER = new BigUint64Array([
     0x3bf5080ac8ba94b1n,
@@ -72,7 +72,7 @@ const R = (s: TArg<BigUint64Array>, i: number) => {
 }
 
 export const F = (s: TArg<BigUint64Array>, bigend = true) => {
-    if(bigend) s.set(bytesToUint64s(uint64sToBytes(s).reverse()).reverse());
+    if(bigend) s.set(bytesToUint64sBE(uint64sToBytesBE(s).reverse()).reverse());
     for(let i = 0; i < 24; i++) R(s, i);
-    if(bigend) s.set(bytesToUint64s(uint64sToBytes(s).reverse()).reverse());
+    if(bigend) s.set(bytesToUint64sBE(uint64sToBytesBE(s).reverse()).reverse());
 }

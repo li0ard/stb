@@ -7,8 +7,7 @@ const _4 = new Uint8Array([4]);
 
 const preparePublicKey = (x: string, y: string) => concatBytes(
     _4,
-    hexToBytes(x).reverse(),
-    hexToBytes(y).reverse()
+    hexToBytes(x), hexToBytes(y)
 )
 
 const performTest = (

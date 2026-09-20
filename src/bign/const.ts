@@ -17,19 +17,6 @@ export const BASH192OID: Uint8Array = hexToBytes("06092A7000020022654D0C");
 /** Bash-256 OID*/
 export const BASH256OID: Uint8Array = hexToBytes("06092A7000020022654D0D");
 
-/** Bign curve 96v1 */
-export const BIGN96: Readonly<BignCurveParameters> = {
-    p: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF13n,
-    n: 0xFFFFFFFFFFFFFFFFFFFFFFFE653AD337910BECBEFD6411ADn,
-    a: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF10n,
-    b: 0x3199B925FD2398A887188E888901737A6ADDE84C64344C83n,
-    Gx: 0n,
-    Gy: 0x8138964BC168C317E6F91BB203DA930CE0217FEBF648CCECn,
-    h: 1n,
-    length: 24,
-    oids: ["1.2.112.0.2.0.34.101.45.3.0"]
-}
-
 /** Bign curve 128v1 */
 export const BIGN128: Readonly<BignCurveParameters> = {
     p: 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff43n,

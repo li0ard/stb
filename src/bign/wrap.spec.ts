@@ -12,7 +12,7 @@ const performTest = (
     expectedWrapped: Uint8Array
 ) => {
     const wrapped = curve.wrapKey(
-        curve.getPublicKey(privateKey, false),
+        curve.getPublicKey(privateKey),
         transportedKey,
         header,
         rand

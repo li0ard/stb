@@ -1,7 +1,6 @@
-import { concatBytes, copyBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { equalBytes, concatBytes, copyBytes, type TArg, type TRet } from "@noble/curves/utils.js";
 import { F } from "./bashf.js";
-import { bytesToUint64s, uint64sToBytes } from "../utils.js";
-import { equalBytes } from "@noble/curves/utils.js";
+import { bytesToUint64sBE, uint64sToBytesBE } from "../utils.js";
 import type { AEADMode } from "../types.js";
 
 const BASH_PRG_NULL = 0x01, // 000000 01
@@ -46,9 +45,9 @@ export class BashPrg {
     }
 
     private process() {
-        const words = bytesToUint64s(this.s);
+        const words = bytesToUint64sBE(this.s);
         F(words);
-        this.s.set(uint64sToBytes(words));
+        this.s.set(uint64sToBytesBE(words));
     }
 
     private commit(code: number) {

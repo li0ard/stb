@@ -1,5 +1,5 @@
 import { copyBytes, createHasher, type Hash, type TArg, type TRet } from "@noble/hashes/utils.js";
-import { bytesToUint64s, uint64sToBytes } from "../utils.js";
+import { bytesToUint64sBE, uint64sToBytesBE } from "../utils.js";
 import { F } from "./bashf.js";
 
 /** `Bash` hash function (STB 34.101.77) */
@@ -31,9 +31,9 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     clone(): T { return this._cloneInto(); }
 
     private processBlock() {
-        const words = bytesToUint64s(this.S);
+        const words = bytesToUint64sBE(this.S);
         F(words);
-        this.S.set(uint64sToBytes(words));
+        this.S.set(uint64sToBytesBE(words));
     }
 
     update(buf: TArg<Uint8Array>): this {
@@ -66,9 +66,9 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
         const s = copyBytes(this.S).fill(0, this.pos, this.blockLen);
         s[this.pos] = 0x40;
 
-        const words = bytesToUint64s(s);
+        const words = bytesToUint64sBE(s);
         F(words);
-        buf.set(uint64sToBytes(words).subarray(0, this.outputLen));
+        buf.set(uint64sToBytesBE(words).subarray(0, this.outputLen));
         this.destroy();
     }
 
