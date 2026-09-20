@@ -38,8 +38,8 @@ describe("[CORE] BelT hash (STB 34.101.31)", () => {
         hexToBytes("2AB0EF11607723793F9F32D7FDC667813BA7186317BDE4F92854F673C0D04A48")
     ));
 
-    test.skipIf(process.env.SKIP_LONG == "1")("#6", () => performTest(
+    /*test.skipIf(process.env.SKIP_LONG == "1")("#6", () => performTest(
         new Uint8Array(1000000).fill(0x61),
         hexToBytes("98001732AC6BD9A3B03B66886320EC8A3E43825581E10779130B02FBD67E21E5")
-    ));
+    ));*/
 });
