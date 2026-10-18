@@ -20,6 +20,7 @@ npm i @li0ard/stb
 
 ## Supported algorithms
 
+- BMQV key exchange protocol (STB 34.101.66)
 - Bign curves and ECDSA (STB 34.101.45)
     - Determenistic signatures
     - Key transport algorithm
