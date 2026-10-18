@@ -2,8 +2,6 @@ import type { WeierstrassOpts } from "@noble/curves/abstract/weierstrass.js";
 import { hexToBytes } from "@noble/curves/utils.js";
 
 export interface BignCurveParameters extends WeierstrassOpts<bigint> {
-    /** Curve point length */
-    length: number;
     /** Curve OIDs */
     oids?: string[];
 }
@@ -26,7 +24,6 @@ export const BIGN128: Readonly<BignCurveParameters> = {
     Gx: 0n,
     Gy: 0x6bf7fc3cfb16d69f5ce4c9a351d6835d78913966c408f6521e29cf1804516a93n,
     h: 1n,
-    length: 32,
     oids: ["1.2.112.0.2.0.34.101.45.3.1"]
 }
 
@@ -39,7 +36,6 @@ export const BIGN192: Readonly<BignCurveParameters> = {
     Gx: 0n,
     Gy: 0x5d438224a82e9e9e6330117e432dbf893a729a11dc86ffa00549e79e66b1d35584403e276b2a42f9ea5ecb31f733c451n,
     h: 1n,
-    length: 48,
     oids: ["1.2.112.0.2.0.34.101.45.3.2"]
 }
 
@@ -52,6 +48,5 @@ export const BIGN256: Readonly<BignCurveParameters> = {
     Gx: 0n,
     Gy: 0xa826ff7ae4037681b182e6f7a0d18fabb0ab41b3b361bce2d2edf81b00cccada6973dde20efa6fd2ff777395eee8226167aa83b9c94c0d04b792ae6fceefedbdn,
     h: 1n,
-    length: 64,
     oids: ["1.2.112.0.2.0.34.101.45.3.3"]
 }

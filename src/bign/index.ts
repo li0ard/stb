@@ -4,16 +4,17 @@ import { randomBytes, bytesToNumberBE, bytesToNumberLE, concatBytes, equalBytes,
 import { beltHash } from "../beltHash/index.js";
 import { wbl, kwp } from "../modes/index.js";
 import { Field } from "@noble/curves/abstract/modular.js";
+import type { ECDSA } from "../types.js";
 
 /** Creates Bign (STB 34.101.45) signing interface */
-export const bign = (parameters: BignCurveParameters) => {
+export const bign = (parameters: BignCurveParameters): ECDSA => {
     const Fp = Field(parameters.p, { isLE: true }),
         Fn = Field(parameters.n, { isLE: true }),
         Point = weierstrass(parameters, { Fp, Fn }),
         { BASE } = Point;
-    const { length, n, a, b } = parameters,
-        hlength = parameters.length / 2,
-        _2l = 2n ** BigInt(length * 4);
+    const { n, a, b } = parameters,
+        l = Fn.BYTES / 2,
+        _2l = 1n << BigInt(Fn.BYTES * 4);
 
     /**
      * Computes public key for a secret key. Checks for validity of the secret key.
@@ -39,7 +40,7 @@ export const bign = (parameters: BignCurveParameters) => {
         
             const k = bytesToNumberBE(kBytes);
             if (k > 0n && k < n)
-                return numberToBytesBE(k, length);
+                return numberToBytesBE(k, Fn.BYTES);
         }
     }
 
@@ -52,13 +53,13 @@ export const bign = (parameters: BignCurveParameters) => {
     ): TRet<Uint8Array> => {
         oid ??= BELTOID;
         const k = bytesToNumberLE(rand ?? drbg(secretKey, digest, oid));
-        const R = BASE.multiply(k).x;
+        const R = BASE.multiply(k);
 
         const S0 = beltHash.create()
             .update(oid)
-            .update(Fp.toBytes(R))
+            .update(Fp.toBytes(R.x))
             .update(digest)
-            .digest().subarray(0, hlength)
+            .digest().subarray(0, l);
 
         const S1 = Fn.toBytes(
             Fn.sub(
@@ -81,11 +82,10 @@ export const bign = (parameters: BignCurveParameters) => {
         oid?: TArg<Uint8Array>
     ): boolean => {
         oid ??= BELTOID;
-        if(signature.length != 3 * hlength) return false;
+        if (signature.length != 3 * l) return false;
 
-        const S0 = signature.subarray(0, hlength),
-            S1 = bytesToNumberLE(signature.subarray(hlength));
-        
+        const S0 = signature.subarray(0, l),
+            S1 = bytesToNumberLE(signature.subarray(l));
         if(S1 >= Fn.ORDER) return false;
 
         const R = BASE.mulAddUnsafe(
@@ -99,7 +99,7 @@ export const bign = (parameters: BignCurveParameters) => {
             .update(oid)
             .update(Fp.toBytes(R.x))
             .update(digest)
-            .digest().subarray(0, hlength)
+            .digest().subarray(0, l)
 
         return equalBytes(S0, t);
     }
@@ -124,8 +124,8 @@ export const bign = (parameters: BignCurveParameters) => {
         wrappedKey: TArg<Uint8Array>,
         header: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
-        const x = bytesToNumberLE(wrappedKey.subarray(0, length));
-        const ct = wrappedKey.subarray(length);
+        const x = bytesToNumberLE(wrappedKey.subarray(0, Fn.BYTES));
+        const ct = wrappedKey.subarray(Fn.BYTES);
 
         const y = Fp.sqrt(Fp.add(
             Fp.add(
@@ -144,6 +144,7 @@ export const bign = (parameters: BignCurveParameters) => {
     }
 
     return Object.freeze({
+        Point,
         getPublicKey,
         sign, verify,
         wrapKey, unwrapKey
