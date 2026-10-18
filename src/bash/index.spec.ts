@@ -61,7 +61,7 @@ describe("[CORE] Bash (STB 34.101.77)", () => {
 
 });
 
-/*describe.skipIf(process.env.SKIP_LONG == "1")("[CORE] Bash (STB 34.101.77)", () => {
+describe.skipIf(process.env.SKIP_LONG == "1")("[CORE] Bash (STB 34.101.77)", () => {
     const _1mb = new Uint8Array(1000000).fill(0x61);
     test("#10", () => {
         const expected = hexToBytes("F8812E85897421D48D56C600D8F76F24F2E0FFC6F879DB8F3279B4F6C53529FA");
@@ -77,4 +77,4 @@ describe("[CORE] Bash (STB 34.101.77)", () => {
         const expected = hexToBytes("E3E32CD6E7AB56FD4BB7D654B93C8325DD7F130ABB99B3B8DC8AC2BF604D51D07DD94DB483451D6433739AE775E4DDF35154E70E1812A4E06EE46E6F02323E41");
         expect(bash256(_1mb)).toStrictEqual(expected);
     }, 20000);
-});*/
+});

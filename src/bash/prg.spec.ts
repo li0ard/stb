@@ -77,7 +77,7 @@ describe("[CORE] Bash-PRG-HASH (STB 34.101.77)", () => {
     });
 });
 
-/*describe.skipIf(process.env.SKIP_LONG == "1")("[CORE] Bash-PRG-HASH (STB 34.101.77)", () => {
+describe.skipIf(process.env.SKIP_LONG == "1")("[CORE] Bash-PRG-HASH (STB 34.101.77)", () => {
     const _1mb = new Uint8Array(1000000).fill(0x61);
     test("#13", () => {
         const expected = hexToBytes("F84CA85F610711674BB8ADDB87B747C6000A6B6735664687854052C60CE0F7B0");
@@ -93,7 +93,7 @@ describe("[CORE] Bash-PRG-HASH (STB 34.101.77)", () => {
         const expected = hexToBytes("45911D1B40F84E5D53C3B27FBB91D696E96924C5F3BD61CC589F26FA9502F3F5847DF96A5D6B44D17388DFF413D0B8AE0D81073D010F1637A20892E06DAB1AF0");
         expect(prgHash(256, 2, _1mb)).toStrictEqual(expected);
     }, 20000);
-});*/
+});
 
 const proceedTest = (
     l: number, d: number,
