@@ -1,9 +1,10 @@
-import { concatBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, concatBytes, equalBytes, type TArg, type TRet } from "@noble/curves/utils.js";
 import { wbl } from "./wbl.js";
-import { equalBytes } from "@noble/curves/utils.js";
 import type { WrapMode } from "../types.js";
 
 export const kwp = (key: TArg<Uint8Array>, integrity: TArg<Uint8Array>): WrapMode => {
+    abytes(key, undefined, "key");
+    abytes(integrity, undefined, "integrity");
     const mode = wbl(key);
 
     return Object.freeze({

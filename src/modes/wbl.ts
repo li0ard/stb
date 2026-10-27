@@ -1,6 +1,5 @@
-import { copyBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, copyBytes, numberToBytesLE, type TArg, type TRet } from "@noble/curves/utils.js";
 import { Belt } from "../belt/index.js";
-import { numberToBytesLE } from "@noble/curves/utils.js";
 import type { BlockMode } from "../types.js";
 
 const xorInPlace = (
@@ -13,12 +12,14 @@ const xorInPlace = (
 }
 
 export const wbl = (key: TArg<Uint8Array>): BlockMode => {
+    abytes(key, undefined, "key");
     const cipher = new Belt(key);
 
     return Object.freeze({
         encrypt: (plaintext: TArg<Uint8Array>): TRet<Uint8Array> => {
-            const buf = copyBytes(plaintext);
-            const count = buf.length;
+            abytes(plaintext, undefined, "plaintext");
+            const buf = copyBytes(plaintext),
+                count = buf.length;
             if (count < 2 * cipher.blockSize)
                 throw new Error(`Data length must be >= ${2 * cipher.blockSize} octets`);
 
@@ -42,8 +43,9 @@ export const wbl = (key: TArg<Uint8Array>): BlockMode => {
         },
 
         decrypt: (ciphertext: TArg<Uint8Array>): TRet<Uint8Array> => {
-            const buf = copyBytes(ciphertext);
-            const count = buf.length;
+            abytes(ciphertext, undefined, "ciphertext");
+            const buf = copyBytes(ciphertext),
+                count = buf.length;
             if (count < 2 * cipher.blockSize)
                 throw new Error(`Data length must be >= ${2 * cipher.blockSize} octets`);
 

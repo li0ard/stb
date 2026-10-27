@@ -1,11 +1,9 @@
-import { concatBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, concatBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { negBlock, xorBytes } from "../utils.js";
 import { Belt } from "../belt/index.js";
 
 export const compress = (msg: TArg<Uint8Array>): TRet<Uint8Array[]> => {
-    if (msg.length !== 64)
-        throw new Error("Input must be exactly 64 bytes (512 bits) long");
-
+    abytes(msg, 64, "msg");
     const X1 = msg.subarray(0, 16),
         X2 = msg.subarray(16, 32),
         X3 = msg.subarray(32, 48),

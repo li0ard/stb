@@ -1,11 +1,11 @@
-import { concatBytes, copyBytes, createHasher, type Hash, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, aoutput, concatBytes, copyBytes, createHasher, type Hash, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { H } from "../belt/const.js";
 import { compress } from "../modes/compress.js";
-import { xorBytes } from "../utils.js";
+import { xorBytesInPlace } from "../utils.js";
 import { numberToBytesLE } from "@noble/curves/utils.js";
 
-/** BelT hash function */
-export class BeltHash implements Hash<BeltHash> {
+/** Internal BelT hash class */
+export class _BeltHash implements Hash<_BeltHash> {
     readonly blockLen = 32;
     readonly outputLen = 32;
     readonly canXOF = false;
@@ -16,6 +16,7 @@ export class BeltHash implements Hash<BeltHash> {
     private pos!: number;
     private length!: bigint;
 
+    /** Internal BelT hash class */
     constructor() { this.destroy(); }
 
     destroy() {
@@ -28,11 +29,12 @@ export class BeltHash implements Hash<BeltHash> {
 
     private processBlock(block: TArg<Uint8Array>) {
         const [t, h] = compress(concatBytes(block, this.h));
-        this.s.set(xorBytes(this.s, t));
+        xorBytesInPlace(this.s, t);
         this.h.set(h);
     }
 
     update(buf: TArg<Uint8Array>): this {
+        abytes(buf, undefined, "buf");
         let data: Uint8Array = copyBytes(buf);
         this.length += BigInt(data.length);
 
@@ -51,6 +53,7 @@ export class BeltHash implements Hash<BeltHash> {
     }
 
     digestInto(buf: TArg<Uint8Array>) {
+        aoutput(buf, this);
         if (this.pos > 0) {
             this.buffer.fill(0, this.pos);
             this.processBlock(this.buffer);
@@ -70,8 +73,8 @@ export class BeltHash implements Hash<BeltHash> {
         return out;
     }
 
-    _cloneInto(to?: BeltHash): BeltHash {
-        to ||= new BeltHash();
+    _cloneInto(to?: _BeltHash): _BeltHash {
+        to ||= new _BeltHash();
         to.h.set(this.h);
         to.s.set(this.s);
         to.buffer.set(this.buffer);
@@ -81,10 +84,11 @@ export class BeltHash implements Hash<BeltHash> {
         return to;
     }
 
-    clone(): BeltHash { return this._cloneInto(); }
+    clone(): _BeltHash { return this._cloneInto(); }
 
-    static create() { return new BeltHash(); }
+    /** Create hash instance */
+    static create() { return new _BeltHash(); }
 }
 
 /** BelT hash function */
-export const beltHash = createHasher(BeltHash.create);
+export const beltHash = createHasher(_BeltHash.create);

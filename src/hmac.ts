@@ -1,25 +1,25 @@
 import { _HMAC } from "@noble/hashes/hmac.js";
-import type { Hash, TArg, TRet } from "@noble/hashes/utils.js";
-import { BeltHash, beltHash } from "./beltHash/index.js";
+import type { TArg, TRet } from "@noble/hashes/utils.js";
+import { beltHash } from "./beltHash/index.js";
 import { bash128, bash192, bash256 } from "./bash/index.js";
 
 /** HMAC over BelT hash function */
-export class BeltHMAC extends _HMAC<Hash<BeltHash>> {
+export class BeltHMAC extends _HMAC<BeltHMAC> {
     constructor(key: TArg<Uint8Array>) { super(beltHash, key); }
 }
 
 /** HMAC over Bash-128 hash function */
-export class Bash128HMAC extends _HMAC<Hash<Bash128HMAC>> {
+export class Bash128HMAC extends _HMAC<Bash128HMAC> {
     constructor(key: TArg<Uint8Array>) { super(bash128, key); }
 }
 
 /** HMAC over Bash-192 hash function */
-export class Bash192HMAC extends _HMAC<Hash<Bash192HMAC>> {
+export class Bash192HMAC extends _HMAC<Bash192HMAC> {
     constructor(key: TArg<Uint8Array>) { super(bash192, key); }
 }
 
 /** HMAC over Bash-256 hash function */
-export class Bash256HMAC extends _HMAC<Hash<Bash256HMAC>> {
+export class Bash256HMAC extends _HMAC<Bash256HMAC> {
     constructor(key: TArg<Uint8Array>) { super(bash256, key); }
 }
 

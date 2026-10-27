@@ -1,40 +1,46 @@
-import { concatBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { Belt } from "../belt/index.js";
-import { getPadLength, xorBytes } from "../utils.js";
+import { abytesAligned, xorBytes } from "../utils.js";
 import type { BlockMode } from "../types.js";
 
+/** Cipher Feedback (CFB) mode */
 export const cfb = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>): BlockMode => {
-    const cipher = new Belt(key);
-    if (iv.length == 0 || iv.length % cipher.blockSize !== 0)
-        throw new Error("Invalid IV size");
+    abytes(key, undefined, "key");
+    const cipher = new Belt(key), bs = cipher.blockSize;
+    abytesAligned(iv, bs, "iv");
 
     return Object.freeze({
         encrypt: (plaintext: TArg<Uint8Array>): TRet<Uint8Array> => {
-            let r: Uint8Array[] = [];
-            for (let i = 0; i < iv.length; i += cipher.blockSize)
-                r.push(iv.subarray(i, i + cipher.blockSize));
+            abytes(plaintext, undefined, "plaintext");
+            const r: Uint8Array[] = [];
+            for (let i = 0; i < iv.length; i += bs) r.push(iv.subarray(i, i + bs));
 
-            const result: Uint8Array[] = [];
-            for(let i = 0; i < (plaintext.length + getPadLength(plaintext.length, cipher.blockSize)); i += cipher.blockSize) {
-                result.push(xorBytes(cipher.encrypt(r[0]), plaintext.subarray(i, i + cipher.blockSize)));
-                r = r.slice(1).concat(result[result.length - 1]);
+            const out = new Uint8Array(plaintext.length);
+            for (let n = 0; n < Math.ceil(plaintext.length / bs); n++) {
+                const i = n * bs;
+                const ct = xorBytes(plaintext.subarray(i, i + bs), cipher.encrypt(r[0]));
+                out.set(ct, i);
+                r.shift();
+                r.push(ct);
             }
 
-            return concatBytes(...result);
+            return out;
         },
         decrypt: (ciphertext: TArg<Uint8Array>): TRet<Uint8Array> => {
-            let r: Uint8Array[] = [];
-            for (let i = 0; i < iv.length; i += cipher.blockSize)
-                r.push(iv.subarray(i, i + cipher.blockSize));
+            abytes(ciphertext, undefined, "ciphertext");
+            const r: Uint8Array[] = [];
+            for (let i = 0; i < iv.length; i += bs) r.push(iv.subarray(i, i + bs));
 
-            const result: Uint8Array[] = [];
-            for(let i = 0; i < (ciphertext.length + getPadLength(ciphertext.length, cipher.blockSize)); i += cipher.blockSize) {
-                const blk = ciphertext.slice(i, i + cipher.blockSize);
-                result.push(xorBytes(cipher.encrypt(r[0]), blk));
-                r = r.slice(1).concat(blk);
+            const out = new Uint8Array(ciphertext.length);
+            for (let n = 0; n < Math.ceil(ciphertext.length / bs); n++) {
+                const i = n * bs;
+                const ct = ciphertext.subarray(i, i + bs);
+                out.set(xorBytes(ct, cipher.encrypt(r[0])), i);
+                r.shift();
+                r.push(ct);
             }
 
-            return concatBytes(...result);
+            return out;
         }
     });
 }

@@ -1,16 +1,16 @@
-import type { TArg, TRet } from "@noble/hashes/utils.js";
+import { abytes, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { Belt } from "../belt/index.js";
 import type { BlockMode } from "../types.js";
+import { abytesAligned } from "../utils.js";
 
 export const ecb = (key: TArg<Uint8Array>): BlockMode => {
+    abytes(key, undefined, "key");
     const cipher = new Belt(key);
     const encrypter = cipher.encrypt.bind(cipher);
     const decrypter = cipher.decrypt.bind(cipher);
 
     const core = (crypter: (msg: TArg<Uint8Array>) => TRet<Uint8Array>, data: TArg<Uint8Array>): TRet<Uint8Array> => {
-        if (data.length == 0 || data.length % cipher.blockSize !== 0)
-            throw new Error("Data not aligned");
-
+        abytesAligned(data, cipher.blockSize);
         const output = new Uint8Array(data.length);
         for(let i = 0; i < data.length; i += cipher.blockSize)
             output.set(crypter(data.subarray(i, i + cipher.blockSize)), i);

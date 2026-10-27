@@ -1,23 +1,25 @@
-import { copyBytes, u32, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, copyBytes, u32, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { mulC, xorBytes } from "../utils.js";
 import { Belt } from "../belt/index.js";
 import { wbl } from "./wbl.js";
 import type { DiskMode } from "../types.js";
 
 export const bde = (key: TArg<Uint8Array>): DiskMode => {
-    const cipher = new Belt(key);
-    const encrypter = cipher.encrypt.bind(cipher);
-    const decrypter = cipher.decrypt.bind(cipher);
+    abytes(key, undefined, "key");
+    const cipher = new Belt(key),
+        encrypter = cipher.encrypt.bind(cipher),
+        decrypter = cipher.decrypt.bind(cipher);
 
     const core = (
         crypter: (msg: TArg<Uint8Array>) => TRet<Uint8Array>,
         msg: TArg<Uint8Array>,
         iv: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
-        const s = cipher.encrypt(iv);
-        const s32 = u32(s);
-
-        const output = new Uint8Array(msg.length);
+        abytes(msg, undefined, "msg");
+        abytes(iv, cipher.blockSize, "iv");
+        const s = cipher.encrypt(iv),
+            s32 = u32(s),
+            output = new Uint8Array(msg.length);
         for(let i = 0; i < msg.length; i += cipher.blockSize) {
             mulC(s32);
             const ct = crypter(xorBytes(
@@ -39,18 +41,21 @@ export const bde = (key: TArg<Uint8Array>): DiskMode => {
 }
 
 export const sde = (key: TArg<Uint8Array>): DiskMode => {
-    const cipher = new Belt(key);
-    const mode = wbl(key);
-    const encrypter = mode.encrypt.bind(mode);
-    const decrypter = mode.decrypt.bind(mode);
+    abytes(key, undefined, "key");
+    const cipher = new Belt(key),
+        mode = wbl(key),
+        encrypter = mode.encrypt.bind(mode),
+        decrypter = mode.decrypt.bind(mode);
 
     const core = (
         crypter: (msg: TArg<Uint8Array>) => TRet<Uint8Array>,
         msg: TArg<Uint8Array>,
         iv: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
-        const s = cipher.encrypt(iv);
-        const result = copyBytes(msg);
+        abytes(msg, undefined, "msg");
+        abytes(iv, cipher.blockSize, "iv");
+        const s = cipher.encrypt(iv),
+            result = copyBytes(msg);
         result.set(xorBytes(result, s));
     
         const encrypted = crypter(result);

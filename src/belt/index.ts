@@ -1,4 +1,4 @@
-import { concatBytes, rotl, u32, u8, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, concatBytes, rotl, u32, u8, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { H, keyIndex } from "./const.js";
 import { compress } from "../modes/compress.js";
 import type { Cipher } from "../types.js";
@@ -9,7 +9,9 @@ const G = (x: number, r: number): number => rotl(
     r
 );
 
+/** BelT key expand function */
 export const keyExpand = (key: TArg<Uint8Array>): TRet<Uint8Array> => {
+    abytes(key, undefined, "key");
     if(key.length < 16 || key.length > 32) throw new Error("Invalid key length");
     const ks = new Uint8Array(32);
     ks.set(key);
@@ -22,18 +24,20 @@ export const keyExpand = (key: TArg<Uint8Array>): TRet<Uint8Array> => {
     return ks;
 }
 
+/** BelT key transform function */
 export const keyTransform = (
     key: TArg<Uint8Array>,
     level: TArg<Uint8Array>,
     iv: TArg<Uint8Array>,
     outputLen: number
 ): TRet<Uint8Array> => {
+    abytes(key, undefined, "key");
+    abytes(level, 12, "level");
+    abytes(iv, 16, "iv");
     if (outputLen > key.length ||
         ![16, 24, 32].includes(outputLen) ||
         ![16, 24, 32].includes(key.length)
     ) throw new Error("Invalid key lengths: m must be <= n and both must be 16, 24, or 32");
-    if (level.length !== 12) throw new Error("Level must be 12 bytes");
-    if (iv.length !== 16) throw new Error("IV must be 16 bytes");
     const offset = 4 * (key.length - 16) + 2 * (outputLen - 16);
 
     return compress(concatBytes(
@@ -56,6 +60,7 @@ export class Belt implements Cipher {
     constructor(key: TArg<Uint8Array>) { this.ks = u32(keyExpand(key)); }
 
     encrypt(block: TArg<Uint8Array>): TRet<Uint8Array> {
+        abytes(block, this.blockSize, "block");
         const inBlock = u32(block);
         let a = inBlock[0],
             b = inBlock[1],
@@ -87,6 +92,7 @@ export class Belt implements Cipher {
     }
 
     decrypt(block: TArg<Uint8Array>): TRet<Uint8Array> {
+        abytes(block, this.blockSize, "block");
         const inBlock = u32(block);
         let a = inBlock[0],
             b = inBlock[1],

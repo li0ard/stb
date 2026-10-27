@@ -1,6 +1,6 @@
 import { weierstrass } from "@noble/curves/abstract/weierstrass.js";
 import { BELTOID, BIGN128, BIGN192, BIGN256, type BignCurveParameters } from "./const.js";
-import { randomBytes, bytesToNumberBE, bytesToNumberLE, concatBytes, equalBytes, numberToBytesBE, numberToBytesLE, type TArg, type TRet } from "@noble/curves/utils.js";
+import { randomBytes, bytesToNumberBE, bytesToNumberLE, concatBytes, equalBytes, numberToBytesBE, numberToBytesLE, type TArg, type TRet, copyBytes, abytes } from "@noble/curves/utils.js";
 import { beltHash } from "../beltHash/index.js";
 import { wbl, kwp } from "../modes/index.js";
 import { Field } from "@noble/curves/abstract/modular.js";
@@ -32,12 +32,11 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
         oid: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
         const theta = beltHash.create().update(oid).update(secretKey).digest();
-        let kBytes = new Uint8Array(digest);
+        let kBytes = copyBytes(digest);
 
         const mode = wbl(theta);
         while (true) {
             kBytes = mode.encrypt(kBytes);
-        
             const k = bytesToNumberBE(kBytes);
             if (k > 0n && k < n)
                 return numberToBytesBE(k, Fn.BYTES);
@@ -52,6 +51,9 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
         rand?: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
         oid ??= BELTOID;
+        abytes(secretKey, undefined, "secretKey");
+        abytes(digest, undefined, "digest");
+        abytes(oid, undefined, "oid");
         const k = bytesToNumberLE(rand ?? drbg(secretKey, digest, oid));
         const R = BASE.multiply(k);
 
@@ -82,6 +84,10 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
         oid?: TArg<Uint8Array>
     ): boolean => {
         oid ??= BELTOID;
+        abytes(publicKey, undefined, "publicKey");
+        abytes(digest, undefined, "digest");
+        abytes(signature, undefined, "signature");
+        abytes(oid, undefined, "oid");
         if (signature.length != 3 * l) return false;
 
         const S0 = signature.subarray(0, l),
@@ -99,7 +105,7 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
             .update(oid)
             .update(Fp.toBytes(R.x))
             .update(digest)
-            .digest().subarray(0, l)
+            .digest().subarray(0, l);
 
         return equalBytes(S0, t);
     }
@@ -111,9 +117,12 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
         header: TArg<Uint8Array>,
         rand?: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
-        const k = Fn.create(bytesToNumberLE(rand ?? randomBytes(Fn.BYTES)));
-        const R = Fp.toBytes(BASE.multiply(k).x);
-        const theta = Fp.toBytes(Point.fromBytes(publicKey).multiply(k).x).subarray(0, 32);
+        abytes(publicKey, undefined, "publicKey");
+        abytes(key, undefined, "key");
+        abytes(header, undefined, "header");
+        const k = Fn.create(bytesToNumberLE(rand ?? randomBytes(Fn.BYTES))),
+            R = Fp.toBytes(BASE.multiply(k).x),
+            theta = Fp.toBytes(Point.fromBytes(publicKey).multiply(k).x).subarray(0, 32);
 
         return concatBytes(R, kwp(theta, header).wrap(key));
     }
@@ -124,18 +133,20 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
         wrappedKey: TArg<Uint8Array>,
         header: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
-        const x = bytesToNumberLE(wrappedKey.subarray(0, Fn.BYTES));
-        const ct = wrappedKey.subarray(Fn.BYTES);
+        abytes(privateKey, undefined, "privateKey");
+        abytes(wrappedKey, undefined, "wrappedKey");
+        abytes(header, undefined, "header");
+        const x = bytesToNumberLE(wrappedKey.subarray(0, Fn.BYTES)),
+            ct = wrappedKey.subarray(Fn.BYTES),
+            y = Fp.sqrt(Fp.add(
+                Fp.add(
+                    Fp.pow(x, 3n),
+                    Fp.mul(a, x)
+                ),
+                b
+            ));
 
-        const y = Fp.sqrt(Fp.add(
-            Fp.add(
-                Fp.pow(x, 3n),
-                Fp.mul(a, x)
-            ),
-            b
-        ));
-
-        const R = Point.fromAffine({ x,y });
+        const R = Point.fromAffine({ x, y });
         R.assertValidity();
 
         const theta = Fp.toBytes(R.multiply(Fn.fromBytes(privateKey)).x).subarray(0, 32);
@@ -151,7 +162,13 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
     });
 }
 
+/** `Bign128v1` curve */
 export const bign128 = bign(BIGN128);
+/** `Bign192v1` curve */
 export const bign192 = bign(BIGN192);
+/** `Bign256v1` curve */
 export const bign256 = bign(BIGN256);
+
+export const CURVES = { bign128, bign192, bign256 }
+
 export * from "./const.js";

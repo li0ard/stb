@@ -1,17 +1,18 @@
-import type { TArg, TRet } from "@noble/hashes/utils.js";
+import { abytes, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { Belt } from "../belt/index.js";
-import { xorBytes } from "../utils.js";
+import { abytesAligned, xorBytes } from "../utils.js";
 import type { BlockMode } from "../types.js";
 
+/** Cipher Block Chaining (CBC) mode */
 export const cbc = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>): BlockMode => {
+    abytes(key, undefined, "key");
     const cipher = new Belt(key);
-    if (iv.length !== cipher.blockSize) throw new Error("Invalid IV size");
+    abytes(iv, cipher.blockSize, "iv");
 
     return Object.freeze({
         encrypt: (plaintext: TArg<Uint8Array>): TRet<Uint8Array> => {
-            if (plaintext.length % cipher.blockSize !== 0) throw new Error("Plaintext not aligned");
+            abytesAligned(plaintext, cipher.blockSize);
             let buf: TArg<Uint8Array> = new Uint8Array(iv);
-
             const output = new Uint8Array(plaintext.length);
             for(let i = 0; i < plaintext.length; i += cipher.blockSize) {
                 const blk = cipher.encrypt(xorBytes(plaintext.subarray(i, i + cipher.blockSize), buf));
@@ -22,9 +23,8 @@ export const cbc = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>): BlockMode => {
             return output;
         },
         decrypt: (ciphertext: TArg<Uint8Array>): TRet<Uint8Array> => {
-            if (ciphertext.length % cipher.blockSize !== 0) throw new Error("Ciphertext not aligned");
+            abytesAligned(ciphertext, cipher.blockSize);
             let buf: TArg<Uint8Array> = new Uint8Array(iv);
-
             const output = new Uint8Array(ciphertext.length);
             for(let i = 0; i < ciphertext.length; i += cipher.blockSize) {
                 const blk = ciphertext.subarray(i,i + cipher.blockSize);

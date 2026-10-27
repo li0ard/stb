@@ -150,3 +150,9 @@ export type ECKE = {
         idB?: TArg<Uint8Array>
     ) => BakeResult;
 }
+
+export type RNGFunction = (n: number) => TRet<Uint8Array>;
+export type OTPGenerator = {
+    hotp: (counter: TArg<Uint8Array>) => string;
+    totp: (now: number) => string;
+}

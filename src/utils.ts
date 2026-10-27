@@ -1,19 +1,4 @@
-import { bytesToNumberBE, numberToBytesBE } from "@noble/curves/utils.js";
-import type { TArg, TRet } from "@noble/hashes/utils.js";
-
-export const bytesToUint64sBE = (b: TArg<Uint8Array>): TRet<BigUint64Array> => {
-    const size = Math.floor(b.length / 8);
-    const result = new BigUint64Array(size);
-    
-    for (let i = 0; i < size; i++) result[i] = bytesToNumberBE(b.subarray(i * 8, i * 8 + 8));
-    return result;
-}
-
-export const uint64sToBytesBE = (w: TArg<BigUint64Array>): TRet<Uint8Array> => {
-    const result = new Uint8Array(w.length * 8);
-    for (let i = 0; i < w.length; i++) result.set(numberToBytesBE(w[i], 8), i * 8);
-    return result;
-}
+import { abytes, anumber, type TArg, type TRet } from "@noble/hashes/utils.js";
 
 export const xorBytes = (a: TArg<Uint8Array>, b: TArg<Uint8Array>): TRet<Uint8Array> => {
     const mlen = Math.min(a.length, b.length);
@@ -23,10 +8,14 @@ export const xorBytes = (a: TArg<Uint8Array>, b: TArg<Uint8Array>): TRet<Uint8Ar
     return result;
 }
 
-export const getPadLength = (dataLength: number, blockSize: number): number => {
-    if(dataLength < blockSize) return blockSize - dataLength;
-    if(dataLength % blockSize == 0) return 0;
-    return blockSize - dataLength % blockSize;
+export const xorBytesInPlace = (
+    dst: TArg<Uint8Array>,
+    src: TArg<Uint8Array>,
+    off = 0,
+    len = dst.length
+) => {
+    if(len > src.length) throw new Error("Uint8Array's must have same length or dst < src");
+    for(let i = 0; i < len; i++) dst[i] ^= src[off + i];
 }
 
 export const mulC = (block: TArg<Uint32Array>) => {
@@ -44,4 +33,21 @@ export const negBlock = (block: TArg<Uint8Array>): TRet<Uint8Array> => {
     for (let i = 0; i < block.length; i++) result[i] = ~block[i] & 0xFF;
 
     return result;
+}
+
+const atitle = (title: string): string => title ? `"${title}" ` : '';
+
+export const abytesAligned = (
+    value: TArg<Uint8Array>,
+    blockSize: number,
+    title: string = ""
+): TRet<Uint8Array> => {
+    abytes(value, undefined, title);
+    anumber(blockSize);
+    if (value.length !== 0 && value.length % blockSize === 0) return value as TRet<Uint8Array>;
+    
+    const ofLen = ` of length aligned to ${blockSize}`;
+    const got = `length=${value.length}`;
+    const message = atitle(title) + 'expected Uint8Array' + ofLen + ', got ' + got;
+    throw new RangeError(message);
 }

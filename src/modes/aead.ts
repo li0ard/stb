@@ -1,9 +1,9 @@
-import { concatBytes, copyBytes, u32, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { u32 } from "@noble/hashes/utils.js";
 import { mulC, xorBytes } from "../utils.js";
 import { Belt } from "../belt/index.js";
 import { H } from "../belt/const.js";
 import { ctr } from "./ctr.js";
-import { equalBytes, numberToBytesLE } from "@noble/curves/utils.js";
+import { abytes, concatBytes, copyBytes, abool, equalBytes, numberToBytesLE, type TArg, type TRet } from "@noble/curves/utils.js";
 import type { AEADMode } from "../types.js";
 
 const pad = (data: TArg<Uint8Array>): TRet<Uint8Array> => {
@@ -13,9 +13,7 @@ const pad = (data: TArg<Uint8Array>): TRet<Uint8Array> => {
 }
 
 const gf2mMul = (a: TArg<Uint8Array>, b: TArg<Uint8Array>): TRet<Uint8Array> => {
-    const temp = new Uint8Array(a);
-    const result = new Uint8Array(16);
-    
+    const temp = new Uint8Array(a), result = new Uint8Array(16);
     for (let i = 0; i < 128; i++) {
         const byteIndex = Math.floor(i / 8);
         const bitIndex = i % 8;
@@ -36,15 +34,18 @@ const gf2mMul = (a: TArg<Uint8Array>, b: TArg<Uint8Array>): TRet<Uint8Array> => 
 }
 
 const dwp_che = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>, isCHE: boolean): AEADMode => {
+    abytes(key, undefined, "key");
     const cipher = new Belt(key);
+    abytes(iv, cipher.blockSize, "iv");
+    abool(isCHE);
     const r = isCHE
         ? cipher.encrypt(iv)
         : cipher.encrypt(cipher.encrypt(iv));
 
     const ctr2 = (msg: TArg<Uint8Array>): TRet<Uint8Array> => {
-        const buf = cipher.encrypt(iv);
-        const buf32 = u32(buf);
-        const output = new Uint8Array(msg.length);
+        const buf = cipher.encrypt(iv),
+            buf32 = u32(buf),
+            output = new Uint8Array(msg.length);
         for (let i = 0; i < msg.length; i += cipher.blockSize) {
             mulC(buf32);
             buf[0] ^= 1;
@@ -85,15 +86,19 @@ const dwp_che = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>, isCHE: boolean): A
     return Object.freeze({
         seal: (plaintext: TArg<Uint8Array>, aad?: TArg<Uint8Array>): TRet<Uint8Array> => {
             aad ??= new Uint8Array();
-            const ciphertext = crypt(plaintext);
-            const mac = calculateMac(ciphertext, aad);
+            abytes(plaintext, undefined, "plaintext");
+            abytes(aad, undefined, "aad");
+            const ciphertext = crypt(plaintext),
+                mac = calculateMac(ciphertext, aad);
 
             return concatBytes(ciphertext, mac);
         },
         open: (ciphertext: TArg<Uint8Array>, aad?: TArg<Uint8Array>): TRet<Uint8Array> => {
             aad ??= new Uint8Array();
-            const ct = ciphertext.subarray(0, -8);
-            const mac = calculateMac(ct, aad);
+            abytes(ciphertext, undefined, "ciphertext");
+            abytes(aad, undefined, "aad");
+            const ct = ciphertext.subarray(0, -8),
+                mac = calculateMac(ct, aad);
             if(!equalBytes(ciphertext.subarray(-8), mac)) throw new Error("Incorrect MAC");
 
             return crypt(ct);
@@ -101,5 +106,7 @@ const dwp_che = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>, isCHE: boolean): A
     });
 }
 
+/** Datawrap (DWP) mode (AEAD) */
 export const dwp = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>): AEADMode => dwp_che(key, iv, false);
+/** Ctr-Hash-Encrypt (CHE) mode (AEAD) */
 export const che = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>): AEADMode => dwp_che(key, iv, true);

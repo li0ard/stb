@@ -1,4 +1,4 @@
-import { concatBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, anumber, concatBytes, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { Belt } from "../belt/index.js";
 import { xorBytes } from "../utils.js";
 import type { MACMode } from "../types.js";
@@ -26,6 +26,8 @@ const psi = (u: TArg<Uint8Array>): TRet<Uint8Array> => {
 }
 
 export const mac = (key: TArg<Uint8Array>, length: number = 8): MACMode => {
+    abytes(key, undefined, "key");
+    anumber(length, "length");
     if(length < 1 || length > 8)
         throw new Error("MAC length must be between 1 and 8 bytes (64 bits)");
 
@@ -34,6 +36,7 @@ export const mac = (key: TArg<Uint8Array>, length: number = 8): MACMode => {
 
     return Object.freeze({
         compute: (msg: TArg<Uint8Array>): TRet<Uint8Array> => {
+            abytes(msg, undefined, "msg");
             let s = new Uint8Array(cipher.blockSize);
 
             const fullBlocks = Math.floor(msg.length / cipher.blockSize);
