@@ -1,5 +1,4 @@
-import { copyBytes, createHasher, type Hash, type TArg, type TRet } from "@noble/hashes/utils.js";
-import { bytesToUint64sBE, uint64sToBytesBE } from "../utils.js";
+import { abytes, aoutput, createHasher, u32, type Hash, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { F } from "./bashf.js";
 
 /** `Bash` hash function (STB 34.101.77) */
@@ -9,6 +8,7 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     readonly canXOF = false;
 
     protected S: Uint8Array;
+    protected S32: Uint32Array; // view над S, общий буфер
     protected pos = 0;
 
     constructor(l: number) {
@@ -18,6 +18,7 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
         this.outputLen = l / 4;
 
         this.S = new Uint8Array(192);
+        this.S32 = u32(this.S);
         this.S[184] = this.outputLen;
     }
 
@@ -31,12 +32,11 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     clone(): T { return this._cloneInto(); }
 
     private processBlock() {
-        const words = bytesToUint64sBE(this.S);
-        F(words);
-        this.S.set(uint64sToBytesBE(words));
+        F(this.S32);
     }
 
     update(buf: TArg<Uint8Array>): this {
+        abytes(buf, undefined, "buf");
         let off = 0, len = buf.length;
         if (len < this.blockLen - this.pos) {
             this.S.set(buf, this.pos);
@@ -63,12 +63,12 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     }
 
     digestInto(buf: TArg<Uint8Array>) {
-        const s = copyBytes(this.S).fill(0, this.pos, this.blockLen);
-        s[this.pos] = 0x40;
+        aoutput(buf, this);
+        this.S.fill(0, this.pos, this.blockLen);
+        this.S[this.pos] = 0x40;
 
-        const words = bytesToUint64sBE(s);
-        F(words);
-        buf.set(uint64sToBytesBE(words).subarray(0, this.outputLen));
+        F(this.S32);
+        buf.set(this.S.subarray(0, this.outputLen));
         this.destroy();
     }
 
@@ -80,55 +80,61 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     }
 }
 
-/** `Bash-128` hash function */
-export class Bash128 extends Bash<Bash128> {
+/** Internal `Bash-128` hash class */
+export class _Bash128 extends Bash<_Bash128> {
+    /** Internal `Bash-128` hash class */
     constructor() { super(128); }
 
-    _cloneInto(to?: Bash128): Bash128 {
-        to ||= new Bash128();
+    _cloneInto(to?: _Bash128): _Bash128 {
+        to ||= new _Bash128();
         to.S.set(this.S);
         to.pos = this.pos;
 
         return to;
     }
 
-    static create(): Bash128 { return new Bash128(); }
+    /** Create hash instance */
+    static create(): _Bash128 { return new _Bash128(); }
 }
 
-/** `Bash-192` hash function */
-export class Bash192 extends Bash<Bash192> {
+/** Internal `Bash-192` hash class */
+export class _Bash192 extends Bash<_Bash192> {
+    /** Internal `Bash-128` hash class */
     constructor() { super(192); }
 
-    _cloneInto(to?: Bash192): Bash192 {
-        to ||= new Bash192();
+    _cloneInto(to?: _Bash192): _Bash192 {
+        to ||= new _Bash192();
         to.S.set(this.S);
         to.pos = this.pos;
 
         return to;
     }
 
-    static create(): Bash192 { return new Bash192(); }
+    /** Create hash instance */
+    static create(): _Bash192 { return new _Bash192(); }
 }
 
-/** `Bash-256` hash function */
-export class Bash256 extends Bash<Bash256> {
+/** Internal `Bash-256` hash class */
+export class _Bash256 extends Bash<_Bash256> {
+    /** Internal `Bash-128` hash class */
     constructor() { super(256); }
 
-    _cloneInto(to?: Bash256): Bash256 {
-        to ||= new Bash256();
+    _cloneInto(to?: _Bash256): _Bash256 {
+        to ||= new _Bash256();
         to.S.set(this.S);
         to.pos = this.pos;
 
         return to;
     }
 
-    static create(): Bash256 { return new Bash256(); }
+    /** Create hash instance */
+    static create(): _Bash256 { return new _Bash256(); }
 }
 
 /** `Bash-128` hash function */
-export const bash128 = createHasher(Bash128.create);
+export const bash128 = createHasher(_Bash128.create);
 /** `Bash-192` hash function */
-export const bash192 = createHasher(Bash192.create);
+export const bash192 = createHasher(_Bash192.create);
 /** `Bash-256` hash function */
-export const bash256 = createHasher(Bash256.create);
+export const bash256 = createHasher(_Bash256.create);
 export * from "./prg.js";
