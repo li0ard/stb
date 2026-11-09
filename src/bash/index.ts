@@ -136,7 +136,7 @@ export class _Bash256 extends Bash<_Bash256> {
  * @returns Digest bytes.
  * @example
  * ```ts
- * import { bash128 } from "@li0ard/gost/bash.js";
+ * import { bash128 } from "@li0ard/stb/bash.js";
  * 
  * bash128(new Uint8Array([97, 98, 99]));
  * bash128.create().update(new Uint8Array([97, 98, 99])).digest();
@@ -153,7 +153,7 @@ export const bash128 = createHasher(() => new _Bash128(), {
  * @returns Digest bytes.
  * @example
  * ```ts
- * import { bash192 } from "@li0ard/gost/bash.js";
+ * import { bash192 } from "@li0ard/stb/bash.js";
  * 
  * bash192(new Uint8Array([97, 98, 99]));
  * bash192.create().update(new Uint8Array([97, 98, 99])).digest();
@@ -170,7 +170,7 @@ export const bash192 = createHasher(() => new _Bash192(), {
  * @returns Digest bytes.
  * @example
  * ```ts
- * import { bash256 } from "@li0ard/gost/bash.js";
+ * import { bash256 } from "@li0ard/stb/bash.js";
  * 
  * bash256(new Uint8Array([97, 98, 99]));
  * bash256.create().update(new Uint8Array([97, 98, 99])).digest();

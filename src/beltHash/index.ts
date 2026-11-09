@@ -68,7 +68,7 @@ export class _BeltHash extends HashMD<_BeltHash> {
  * @returns Digest bytes.
  * @example
  * ```ts
- * import { beltHash } from "@li0ard/gost/belthash.js";
+ * import { beltHash } from "@li0ard/stb/belthash.js";
  * 
  * beltHash(new Uint8Array([97, 98, 99]));
  * beltHash.create().update(new Uint8Array([97, 98, 99])).digest();
