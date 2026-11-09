@@ -1,11 +1,12 @@
 {
   "name": "@li0ard/stb",
-  "version": "0.2.3",
+  "version": "0.1.0",
   "main": "index.js",
   "types": "index.d.ts",
   "type": "module",
   "exports": {
     ".": "./index.js",
+    "./bake.js": "./bake/index.js",
     "./bash.js": "./bash/index.js",
     "./belt.js": "./belt/index.js",
     "./belthash.js": "./beltHash/index.js",

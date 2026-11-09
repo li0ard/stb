@@ -1,15 +1,9 @@
-import { _HMAC, hmac } from "@noble/hashes/hmac.js";
-import type { CHash, Hash, TArg, TRet } from "@noble/hashes/utils.js";
+import { hmac } from "@noble/hashes/hmac.js";
+import type { CHash, Hash, TArg } from "@noble/hashes/utils.js";
 import { beltHash } from "./beltHash/index.js";
 import { bash128, bash192, bash256 } from "./bash/index.js";
+import type { CHmac } from "./types.js";
 
-type CHmac<T extends Hash<T>> = {
-    (key: TArg<Uint8Array>, msg: TArg<Uint8Array>): TRet<Uint8Array>;
-    readonly outputLen: number;
-    readonly blockLen: number;
-    readonly canXOF: boolean;
-    create(key: TArg<Uint8Array>): _HMAC<T>;
-}
 
 const createHmac = <T extends Hash<T>>(hash: CHash<T>): CHmac<T> => {
     const hmacC = (key: TArg<Uint8Array>, msg: TArg<Uint8Array>) =>

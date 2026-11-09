@@ -14,7 +14,7 @@ export const xorBytesInPlace = (
     off = 0,
     len = dst.length
 ) => {
-    if(len > src.length) throw new Error("Uint8Array's must have same length or dst < src");
+    if(len + off > src.length) throw new Error("Uint8Array's must have same length or dst < src");
     for(let i = 0; i < len; i++) dst[i] ^= src[off + i];
 }
 
@@ -50,4 +50,10 @@ export const abytesAligned = (
     const got = `length=${value.length}`;
     const message = atitle(title) + 'expected Uint8Array' + ofLen + ', got ' + got;
     throw new RangeError(message);
+}
+
+export const splitBlocks = (data: TArg<Uint8Array>, blockSize: number): TRet<Uint8Array[]> => {
+    const blocks = [];
+    for (let i = 0; i < data.length; i += blockSize) blocks.push(data.subarray(i, i + blockSize));
+    return blocks as TRet<Uint8Array[]>;
 }

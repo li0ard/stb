@@ -4,6 +4,7 @@ import { Belt } from "../belt/index.js";
 import { wbl } from "./wbl.js";
 import type { DiskMode } from "../types.js";
 
+/** Blockwise Disk Encryption (BDE) mode */
 export const bde = (key: TArg<Uint8Array>): DiskMode => {
     abytes(key, undefined, "key");
     const cipher = new Belt(key),
@@ -40,6 +41,7 @@ export const bde = (key: TArg<Uint8Array>): DiskMode => {
     });
 }
 
+/** Sectorwise Disk Encryption (SDE) mode */
 export const sde = (key: TArg<Uint8Array>): DiskMode => {
     abytes(key, undefined, "key");
     const cipher = new Belt(key),

@@ -25,6 +25,7 @@ const psi = (u: TArg<Uint8Array>): TRet<Uint8Array> => {
     return result;
 }
 
+/** Message Authentication Code (MAC) mode */
 export const mac = (key: TArg<Uint8Array>, length: number = 8): MACMode => {
     abytes(key, undefined, "key");
     anumber(length, "length");

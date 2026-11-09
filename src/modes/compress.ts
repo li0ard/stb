@@ -2,6 +2,7 @@ import { abytes, concatBytes, type TArg, type TRet } from "@noble/hashes/utils.j
 import { negBlock, xorBytes } from "../utils.js";
 import { Belt } from "../belt/index.js";
 
+/** Compress mode */
 export const compress = (msg: TArg<Uint8Array>): TRet<Uint8Array[]> => {
     abytes(msg, 64, "msg");
     const X1 = msg.subarray(0, 16),

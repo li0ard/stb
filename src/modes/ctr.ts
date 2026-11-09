@@ -8,6 +8,7 @@ const incrementCounterAt = (ctr: Uint8Array, pos: number) => {
     while (j < ctr.length) if (++ctr[j++] != 0) break;
 }
 
+/** Counter (CTR) mode */
 export const ctr = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>): StreamMode => {
     abytes(key, undefined, "key");
     const cipher = new Belt(key);

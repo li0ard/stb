@@ -2,6 +2,7 @@ import { abytes, concatBytes, equalBytes, type TArg, type TRet } from "@noble/cu
 import { wbl } from "./wbl.js";
 import type { WrapMode } from "../types.js";
 
+/** Keywrap (KWP) mode */
 export const kwp = (key: TArg<Uint8Array>, integrity: TArg<Uint8Array>): WrapMode => {
     abytes(key, undefined, "key");
     abytes(integrity, undefined, "integrity");

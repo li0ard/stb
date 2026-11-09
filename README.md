@@ -36,10 +36,10 @@ npm i @li0ard/stb
 - AEAD modes (DWP/CHE)
 - Cipher Block Chaining mode (CBC)
 - Cipher Feedback mode (CFB)
-- Compress function
+- Compress mode
 - Counter mode (CTR)
-- Disk encryption (BDE/SDE)
+- Disk encryption modes (BDE/SDE)
 - Electronic Codebook mode (ECB)
-- Keywrap (KWP)
+- Keywrap mode (KWP)
 - Message Authentication Code mode (MAC)
-- Wideblock encryption (WBL)
+- Wideblock encryption mode (WBL)

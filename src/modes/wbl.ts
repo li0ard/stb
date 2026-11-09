@@ -11,6 +11,7 @@ const xorInPlace = (
     for (let k = 0; k < 16; k++) dst[dstOff + k] ^= src[srcOff + k];
 }
 
+/** Wideblock encryption (WBL) mode */
 export const wbl = (key: TArg<Uint8Array>): BlockMode => {
     abytes(key, undefined, "key");
     const cipher = new Belt(key);

@@ -3,6 +3,7 @@ import { Belt } from "../belt/index.js";
 import type { BlockMode } from "../types.js";
 import { abytesAligned } from "../utils.js";
 
+/** Electronic Codebook (ECB) mode */
 export const ecb = (key: TArg<Uint8Array>): BlockMode => {
     abytes(key, undefined, "key");
     const cipher = new Belt(key);

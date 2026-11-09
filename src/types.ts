@@ -1,5 +1,6 @@
 import type { WeierstrassPointCons } from "@noble/curves/abstract/weierstrass.js";
-import type { TArg, TRet } from "@noble/hashes/utils.js";
+import type { _HMAC } from "@noble/hashes/hmac.js";
+import type { Hash, TArg, TRet } from "@noble/hashes/utils.js";
 
 /** Cipher or hash function wrapper */
 export type CipherOrHashFunctionWrapper = (msg: TArg<Uint8Array>) => TRet<Uint8Array>;
@@ -157,4 +158,13 @@ export type RNGFunction = (n: number) => TRet<Uint8Array>;
 export type OTPGenerator = {
     hotp: (counter: TArg<Uint8Array>) => string;
     totp: (now: number) => string;
+}
+
+/** Callable HMAC function type. */
+export type CHmac<T extends Hash<T>> = {
+    (key: TArg<Uint8Array>, msg: TArg<Uint8Array>): TRet<Uint8Array>;
+    readonly outputLen: number;
+    readonly blockLen: number;
+    readonly canXOF: boolean;
+    create(key: TArg<Uint8Array>): _HMAC<T>;
 }
