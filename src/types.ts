@@ -154,7 +154,9 @@ export type ECKE = {
     ) => BakeResult;
 }
 
+/** Callable RNG function type. */
 export type RNGFunction = (n: number) => TRet<Uint8Array>;
+/** Callable OTP genetator function type. */
 export type OTPGenerator = {
     hotp: (counter: TArg<Uint8Array>) => string;
     totp: (now: number) => string;
