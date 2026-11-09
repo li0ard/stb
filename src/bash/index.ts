@@ -1,4 +1,4 @@
-import { abytes, aoutput, createHasher, u32, type Hash, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { abytes, aexists, aoutput, createHasher, hexToBytes, u32, type Hash, type TArg, type TRet } from "@noble/hashes/utils.js";
 import { F } from "./bashf.js";
 
 /** `Bash` hash function (STB 34.101.77) */
@@ -8,8 +8,10 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     readonly canXOF = false;
 
     protected S: Uint8Array;
-    protected S32: Uint32Array; // view над S, общий буфер
+    protected S32: Uint32Array;
     protected pos = 0;
+    protected finished = false;
+    protected destroyed = false;
 
     constructor(l: number) {
         if (l <= 0 || l % 16 !== 0 || l > 256)
@@ -23,11 +25,19 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     }
 
     destroy() {
+        this.destroyed = true;
         this.S.fill(0);
         this.pos = 0;
     }
 
     abstract _cloneInto(to?: T): T;
+
+    protected _cloneIntoMeta(to: Bash<T>) {
+        to.S.set(this.S);
+        to.pos = this.pos;
+        to.finished = this.finished;
+        to.destroyed = this.destroyed;
+    }
  
     clone(): T { return this._cloneInto(); }
 
@@ -36,6 +46,7 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     }
 
     update(buf: TArg<Uint8Array>): this {
+        aexists(this);
         abytes(buf, undefined, "buf");
         let off = 0, len = buf.length;
         if (len < this.blockLen - this.pos) {
@@ -63,7 +74,9 @@ abstract class Bash<T extends Bash<T>> implements Hash<Bash<T>> {
     }
 
     digestInto(buf: TArg<Uint8Array>) {
+        aexists(this);
         aoutput(buf, this);
+        this.finished = true;
         this.S.fill(0, this.pos, this.blockLen);
         this.S[this.pos] = 0x40;
 
@@ -87,14 +100,9 @@ export class _Bash128 extends Bash<_Bash128> {
 
     _cloneInto(to?: _Bash128): _Bash128 {
         to ||= new _Bash128();
-        to.S.set(this.S);
-        to.pos = this.pos;
-
+        this._cloneIntoMeta(to);
         return to;
     }
-
-    /** Create hash instance */
-    static create(): _Bash128 { return new _Bash128(); }
 }
 
 /** Internal `Bash-192` hash class */
@@ -104,14 +112,9 @@ export class _Bash192 extends Bash<_Bash192> {
 
     _cloneInto(to?: _Bash192): _Bash192 {
         to ||= new _Bash192();
-        to.S.set(this.S);
-        to.pos = this.pos;
-
+        this._cloneIntoMeta(to);
         return to;
     }
-
-    /** Create hash instance */
-    static create(): _Bash192 { return new _Bash192(); }
 }
 
 /** Internal `Bash-256` hash class */
@@ -121,20 +124,60 @@ export class _Bash256 extends Bash<_Bash256> {
 
     _cloneInto(to?: _Bash256): _Bash256 {
         to ||= new _Bash256();
-        to.S.set(this.S);
-        to.pos = this.pos;
-
+        this._cloneIntoMeta(to);
         return to;
     }
-
-    /** Create hash instance */
-    static create(): _Bash256 { return new _Bash256(); }
 }
 
-/** `Bash-128` hash function */
-export const bash128 = createHasher(_Bash128.create);
-/** `Bash-192` hash function */
-export const bash192 = createHasher(_Bash192.create);
-/** `Bash-256` hash function */
-export const bash256 = createHasher(_Bash256.create);
+/**
+ * `Bash-128` hash function
+ * 
+ * @param msg - message bytes to hash.
+ * @returns Digest bytes.
+ * @example
+ * ```ts
+ * import { bash128 } from "@li0ard/gost/bash.js";
+ * 
+ * bash128(new Uint8Array([97, 98, 99]));
+ * bash128.create().update(new Uint8Array([97, 98, 99])).digest();
+ * ```
+ */
+export const bash128 = createHasher(() => new _Bash128(), {
+    oid: hexToBytes("06092A7000020022654D0B")
+});
+
+/**
+ * `Bash-192` hash function
+ * 
+ * @param msg - message bytes to hash.
+ * @returns Digest bytes.
+ * @example
+ * ```ts
+ * import { bash192 } from "@li0ard/gost/bash.js";
+ * 
+ * bash192(new Uint8Array([97, 98, 99]));
+ * bash192.create().update(new Uint8Array([97, 98, 99])).digest();
+ * ```
+ */
+export const bash192 = createHasher(() => new _Bash192(), {
+    oid: hexToBytes("06092A7000020022654D0C")
+});
+
+/**
+ * `Bash-256` hash function
+ * 
+ * @param msg - message bytes to hash.
+ * @returns Digest bytes.
+ * @example
+ * ```ts
+ * import { bash256 } from "@li0ard/gost/bash.js";
+ * 
+ * bash256(new Uint8Array([97, 98, 99]));
+ * bash256.create().update(new Uint8Array([97, 98, 99])).digest();
+ * ```
+ */
+export const bash256 = createHasher(() => new _Bash256(), {
+    oid: hexToBytes("06092A7000020022654D0D")
+});
+
 export * from "./prg.js";

@@ -1,40 +1,35 @@
-import { _HMAC } from "@noble/hashes/hmac.js";
-import type { TArg, TRet } from "@noble/hashes/utils.js";
+import { _HMAC, hmac } from "@noble/hashes/hmac.js";
+import type { CHash, Hash, TArg, TRet } from "@noble/hashes/utils.js";
 import { beltHash } from "./beltHash/index.js";
 import { bash128, bash192, bash256 } from "./bash/index.js";
 
-/** HMAC over BelT hash function */
-export class BeltHMAC extends _HMAC<BeltHMAC> {
-    constructor(key: TArg<Uint8Array>) { super(beltHash, key); }
+type CHmac<T extends Hash<T>> = {
+    (key: TArg<Uint8Array>, msg: TArg<Uint8Array>): TRet<Uint8Array>;
+    readonly outputLen: number;
+    readonly blockLen: number;
+    readonly canXOF: boolean;
+    create(key: TArg<Uint8Array>): _HMAC<T>;
 }
+
+const createHmac = <T extends Hash<T>>(hash: CHash<T>): CHmac<T> => {
+    const hmacC = (key: TArg<Uint8Array>, msg: TArg<Uint8Array>) =>
+        hmac(hash, key, msg);
+    hmacC.outputLen = hash.outputLen;
+    hmacC.blockLen = hash.blockLen;
+    hmacC.canXOF = false;
+    hmacC.create = (key: TArg<Uint8Array>) => hmac.create(hash, key);
+
+    return Object.freeze(hmacC);
+}
+
+/** HMAC over BelT hash function */
+export const beltHmac = createHmac(beltHash);
 
 /** HMAC over Bash-128 hash function */
-export class Bash128HMAC extends _HMAC<Bash128HMAC> {
-    constructor(key: TArg<Uint8Array>) { super(bash128, key); }
-}
+export const bash128Hmac = createHmac(bash128);
 
 /** HMAC over Bash-192 hash function */
-export class Bash192HMAC extends _HMAC<Bash192HMAC> {
-    constructor(key: TArg<Uint8Array>) { super(bash192, key); }
-}
+export const bash192Hmac = createHmac(bash192);
 
 /** HMAC over Bash-256 hash function */
-export class Bash256HMAC extends _HMAC<Bash256HMAC> {
-    constructor(key: TArg<Uint8Array>) { super(bash256, key); }
-}
-
-/** HMAC over BelT hash function */
-export const beltHmac = (key: TArg<Uint8Array>, msg: TArg<Uint8Array>): TRet<Uint8Array> =>
-    new BeltHMAC(key).update(msg).digest();
-
-/** HMAC over Bash-128 hash function */
-export const bash128Hmac = (key: TArg<Uint8Array>, msg: TArg<Uint8Array>): TRet<Uint8Array> =>
-    new Bash128HMAC(key).update(msg).digest();
-
-/** HMAC over Bash-192 hash function */
-export const bash192Hmac = (key: TArg<Uint8Array>, msg: TArg<Uint8Array>): TRet<Uint8Array> =>
-    new Bash192HMAC(key).update(msg).digest();
-
-/** HMAC over Bash-256 hash function */
-export const bash256Hmac = (key: TArg<Uint8Array>, msg: TArg<Uint8Array>): TRet<Uint8Array> =>
-    new Bash256HMAC(key).update(msg).digest();
+export const bash256Hmac = createHmac(bash256);

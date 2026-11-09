@@ -1,19 +1,9 @@
 import type { WeierstrassOpts } from "@noble/curves/abstract/weierstrass.js";
-import { hexToBytes } from "@noble/curves/utils.js";
 
 export interface BignCurveParameters extends WeierstrassOpts<bigint> {
     /** Curve OIDs */
     oids?: string[];
 }
-
-/** BelT hash OID */
-export const BELTOID: Uint8Array = hexToBytes("06092A7000020022651F51");
-/** Bash-128 OID*/
-export const BASH128OID: Uint8Array = hexToBytes("06092A7000020022654D0B");
-/** Bash-192 OID*/
-export const BASH192OID: Uint8Array = hexToBytes("06092A7000020022654D0C");
-/** Bash-256 OID*/
-export const BASH256OID: Uint8Array = hexToBytes("06092A7000020022654D0D");
 
 /** Bign curve 128v1 */
 export const BIGN128: Readonly<BignCurveParameters> = {

@@ -1,94 +1,80 @@
-import { abytes, aoutput, concatBytes, copyBytes, createHasher, type Hash, type TArg, type TRet } from "@noble/hashes/utils.js";
+import { HashMD } from "@noble/hashes/_md.js";
+import { aexists, aoutput, concatBytes, createHasher, createView, hexToBytes, type TArg } from "@noble/hashes/utils.js";
 import { H } from "../belt/const.js";
 import { compress } from "../modes/compress.js";
 import { xorBytesInPlace } from "../utils.js";
-import { numberToBytesLE } from "@noble/curves/utils.js";
 
 /** Internal BelT hash class */
-export class _BeltHash implements Hash<_BeltHash> {
-    readonly blockLen = 32;
-    readonly outputLen = 32;
-    readonly canXOF = false;
+export class _BeltHash extends HashMD<_BeltHash> {
+    private h: Uint8Array = H.slice(0, 32);
+    private s: Uint8Array = new Uint8Array(16);
 
-    private h!: Uint8Array;
-    private s!: Uint8Array;
-    private buffer!: Uint8Array;
-    private pos!: number;
-    private length!: bigint;
-
-    /** Internal BelT hash class */
-    constructor() { this.destroy(); }
-
-    destroy() {
-        this.h = H.slice(0, 32);
-        this.s = new Uint8Array(16);
-        this.buffer = new Uint8Array(this.blockLen);
-        this.pos = 0;
-        this.length = 0n;
+    constructor() {
+        super(32, 32, 16, true);
     }
 
-    private processBlock(block: TArg<Uint8Array>) {
+    protected process(view: DataView, offset: number = 0) {
+        const block = new Uint8Array(view.buffer, view.byteOffset + offset, this.blockLen);
         const [t, h] = compress(concatBytes(block, this.h));
         xorBytesInPlace(this.s, t);
         this.h.set(h);
     }
 
-    update(buf: TArg<Uint8Array>): this {
-        abytes(buf, undefined, "buf");
-        let data: Uint8Array = copyBytes(buf);
-        this.length += BigInt(data.length);
+    override digestInto(out: TArg<Uint8Array>) {
+        aexists(this);
+        aoutput(out, this);
+        this.finished = true;
 
-        while (data.length) {
-            const take = Math.min(this.blockLen - this.pos, data.length);
-            this.buffer.set(data.subarray(0, take), this.pos);
-            this.pos += take;
-            data = data.subarray(take);
-
-            if (this.pos === this.blockLen) {
-                this.processBlock(this.buffer);
-                this.pos = 0;
-            }
-        }
-        return this;
-    }
-
-    digestInto(buf: TArg<Uint8Array>) {
-        aoutput(buf, this);
         if (this.pos > 0) {
             this.buffer.fill(0, this.pos);
-            this.processBlock(this.buffer);
+            this.process(this.view);
             this.pos = 0;
         }
 
-        const r = numberToBytesLE(this.length * 8n, 16);
+        const r = new Uint8Array(16);
+        createView(r).setBigUint64(0, BigInt(this.length) * 8n, true);
+
         const [, y] = compress(concatBytes(r, this.s, this.h));
-        buf.set(y.subarray(0, this.outputLen));
-        this.destroy();
+        out.set(y.subarray(0, this.outputLen));
     }
 
-    digest(): TRet<Uint8Array> {
-        const out = new Uint8Array(this.outputLen);
-        this.digestInto(out);
-        
-        return out;
+    // Unused
+    protected get(): number[] { return []; }
+    protected set(...words: number[]) {}
+    protected roundClean() {}
+
+    destroy() {
+        this.destroyed = true;
+        this.h.fill(0);
+        this.s.fill(0);
+        this.buffer.fill(0);
+        this.pos = 0;
+        this.length = 0;
     }
 
     _cloneInto(to?: _BeltHash): _BeltHash {
         to ||= new _BeltHash();
+        this._cloneIntoMeta(to);
         to.h.set(this.h);
         to.s.set(this.s);
-        to.buffer.set(this.buffer);
-        to.pos = this.pos;
-        to.length = this.length;
-
         return to;
     }
-
-    clone(): _BeltHash { return this._cloneInto(); }
-
-    /** Create hash instance */
-    static create() { return new _BeltHash(); }
 }
 
-/** BelT hash function */
-export const beltHash = createHasher(_BeltHash.create);
+/**
+ * BelT hash function
+ * 
+ * @param msg - message bytes to hash.
+ * @returns Digest bytes.
+ * @example
+ * ```ts
+ * import { beltHash } from "@li0ard/gost/belthash.js";
+ * 
+ * beltHash(new Uint8Array([97, 98, 99]));
+ * beltHash.create().update(new Uint8Array([97, 98, 99])).digest();
+ * ```
+ */
+export const beltHash = createHasher(() => new _BeltHash(), {
+    oid: hexToBytes("06092A7000020022651F51")
+});
+

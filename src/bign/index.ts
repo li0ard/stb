@@ -1,5 +1,5 @@
 import { weierstrass } from "@noble/curves/abstract/weierstrass.js";
-import { BELTOID, BIGN128, BIGN192, BIGN256, type BignCurveParameters } from "./const.js";
+import { BIGN128, BIGN192, BIGN256, type BignCurveParameters } from "./const.js";
 import { randomBytes, bytesToNumberBE, bytesToNumberLE, concatBytes, equalBytes, numberToBytesBE, numberToBytesLE, type TArg, type TRet, copyBytes, abytes } from "@noble/curves/utils.js";
 import { beltHash } from "../beltHash/index.js";
 import { wbl, kwp } from "../modes/index.js";
@@ -50,7 +50,7 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
         oid?: TArg<Uint8Array>,
         rand?: TArg<Uint8Array>
     ): TRet<Uint8Array> => {
-        oid ??= BELTOID;
+        oid ??= beltHash.oid!;
         abytes(secretKey, undefined, "secretKey");
         abytes(digest, undefined, "digest");
         abytes(oid, undefined, "oid");
@@ -83,7 +83,7 @@ export const bign = (parameters: BignCurveParameters): ECDSA => {
         signature: TArg<Uint8Array>,
         oid?: TArg<Uint8Array>
     ): boolean => {
-        oid ??= BELTOID;
+        oid ??= beltHash.oid!;
         abytes(publicKey, undefined, "publicKey");
         abytes(digest, undefined, "digest");
         abytes(signature, undefined, "signature");
@@ -169,6 +169,7 @@ export const bign192 = bign(BIGN192);
 /** `Bign256v1` curve */
 export const bign256 = bign(BIGN256);
 
+/** Standard curves */
 export const CURVES = { bign128, bign192, bign256 }
 
 export * from "./const.js";
