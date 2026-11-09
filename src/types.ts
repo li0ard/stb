@@ -155,7 +155,7 @@ export type ECKE = {
 }
 
 /** Callable RNG function type. */
-export type RNGFunction = (n: number) => TRet<Uint8Array>;
+export type RNGFunction = (n: number, aad?: TArg<Uint8Array>) => TRet<Uint8Array>;
 /** Callable OTP genetator function type. */
 export type OTPGenerator = {
     hotp: (counter: TArg<Uint8Array>) => string;
