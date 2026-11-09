@@ -7,8 +7,8 @@ import { H } from "./belt/const";
 const performTest = (
     key: Uint8Array,
     msg: Uint8Array,
-    expected: Uint8Array
-) => expect(beltHmac(key, msg)).toStrictEqual(expected as TRet<Uint8Array>);
+    expected: TRet<Uint8Array>
+) => expect(beltHmac(key, msg)).toStrictEqual(expected);
 
 describe("[HMAC] BelT hash", () => {
     test("#1", () => performTest(

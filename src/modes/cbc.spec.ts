@@ -3,10 +3,10 @@ import { hexToBytes, type TRet } from "@noble/hashes/utils.js";
 import { IV1, IV2, KEY1, KEY2, PT1, PT2 } from "./_test_utils.spec";
 import { cbc } from "./cbc";
 
-const performTest = (key: Uint8Array, iv: Uint8Array, pt: Uint8Array, ct: Uint8Array) => {
+const performTest = (key: Uint8Array, iv: Uint8Array, pt: TRet<Uint8Array>, ct: TRet<Uint8Array>) => {
     const mode = cbc(key, iv);
-    expect(mode.encrypt(pt)).toStrictEqual(ct as TRet<Uint8Array>);
-    expect(mode.decrypt(ct)).toStrictEqual(pt as TRet<Uint8Array>);
+    expect(mode.encrypt(pt)).toStrictEqual(ct);
+    expect(mode.decrypt(ct)).toStrictEqual(pt);
 }
 
 describe("[MODE] CBC", () => {

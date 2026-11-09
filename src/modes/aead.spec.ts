@@ -8,24 +8,24 @@ const performTest = (
     key: Uint8Array,
     iv: Uint8Array,
     aad: Uint8Array,
-    pt: Uint8Array,
-    ct: Uint8Array
+    pt: TRet<Uint8Array>,
+    ct: TRet<Uint8Array>
 ) => {
     const mode = dwp(key, iv);
-    expect(mode.seal(pt, aad)).toStrictEqual(ct as TRet<Uint8Array>);
-    expect(mode.open(ct, aad)).toStrictEqual(pt as TRet<Uint8Array>);
+    expect(mode.seal(pt, aad)).toStrictEqual(ct);
+    expect(mode.open(ct, aad)).toStrictEqual(pt);
 }
 
 const performTest2 = (
     key: Uint8Array,
     iv: Uint8Array,
     aad: Uint8Array,
-    pt: Uint8Array,
-    ct: Uint8Array
+    pt: TRet<Uint8Array>,
+    ct: TRet<Uint8Array>
 ) => {
     const mode = che(key, iv);
-    expect(mode.seal(pt, aad)).toStrictEqual(ct as TRet<Uint8Array>);
-    expect(mode.open(ct, aad)).toStrictEqual(pt as TRet<Uint8Array>);
+    expect(mode.seal(pt, aad)).toStrictEqual(ct);
+    expect(mode.open(ct, aad)).toStrictEqual(pt);
 }
 
 describe("[MODE] DWP", () => {

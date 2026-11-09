@@ -15,9 +15,9 @@ const performTest = (
     signer: ECDSA,
     sideA: Side,
     sideB: Side,
-    expectedK: Uint8Array,
-    expectedTa: Uint8Array,
-    expectedTb: Uint8Array
+    expectedK: TRet<Uint8Array>,
+    expectedTa: TRet<Uint8Array>,
+    expectedTb: TRet<Uint8Array>
 ) => {
     const pubA = signer.getPublicKey(sideA.secretKey),
         pubB = signer.getPublicKey(sideB.secretKey),
@@ -31,9 +31,9 @@ const performTest = (
     expect(resultA.Ta).toStrictEqual(resultB.Ta);
     expect(resultA.Tb).toStrictEqual(resultB.Tb);
 
-    expect(resultA.K).toStrictEqual(expectedK as TRet<Uint8Array>);
-    expect(resultA.Ta).toStrictEqual(expectedTa as TRet<Uint8Array>);
-    expect(resultA.Tb).toStrictEqual(expectedTb as TRet<Uint8Array>);
+    expect(resultA.K).toStrictEqual(expectedK);
+    expect(resultA.Ta).toStrictEqual(expectedTa);
+    expect(resultA.Tb).toStrictEqual(expectedTb);
 }
 
 const IDA = hexToBytes("416C696365"), IDB = hexToBytes("426F62"),

@@ -100,12 +100,12 @@ const proceedTest = (
     key: Uint8Array,
     ann: Uint8Array,
     aad: Uint8Array,
-    pt: Uint8Array,
-    ct: Uint8Array
+    pt: TRet<Uint8Array>,
+    ct: TRet<Uint8Array>
 ) => {
     const mode = prgAead(l, d, key, ann);
-    expect(mode.seal(pt, aad)).toStrictEqual(ct as TRet<Uint8Array>);
-    expect(mode.open(ct, aad)).toStrictEqual(pt as TRet<Uint8Array>);
+    expect(mode.seal(pt, aad)).toStrictEqual(ct);
+    expect(mode.open(ct, aad)).toStrictEqual(pt);
 }
 
 const EMPTY = new Uint8Array(0);

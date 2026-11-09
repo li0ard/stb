@@ -14,16 +14,16 @@ const performTest = (
     curve: ReturnType<typeof bign>,
     privateKey: Uint8Array,
     digest: Uint8Array,
-    expectedPk: Uint8Array,
-    expectedSig: Uint8Array,
+    expectedPk: TRet<Uint8Array>,
+    expectedSig: TRet<Uint8Array>,
     oid?: Uint8Array,
     rand?: Uint8Array
 ) => {
     const publicKey = curve.getPublicKey(privateKey, false);
-    expect(publicKey).toStrictEqual(expectedPk as TRet<Uint8Array>);
+    expect(publicKey).toStrictEqual(expectedPk);
     
     const signature = curve.sign(privateKey, digest, oid, rand);
-    expect(signature).toStrictEqual(expectedSig as TRet<Uint8Array>);
+    expect(signature).toStrictEqual(expectedSig);
     expect(curve.verify(publicKey, digest, signature, oid)).toBeTrue();
 }
 

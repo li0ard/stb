@@ -6,10 +6,10 @@ import { H } from "../belt/const";
 const performTest = (
     curve: ReturnType<typeof bign>,
     privateKey: Uint8Array,
-    transportedKey: Uint8Array,
+    transportedKey: TRet<Uint8Array>,
     header: Uint8Array,
     rand: Uint8Array,
-    expectedWrapped: Uint8Array
+    expectedWrapped: TRet<Uint8Array>
 ) => {
     const wrapped = curve.wrapKey(
         curve.getPublicKey(privateKey),
@@ -18,8 +18,8 @@ const performTest = (
         rand
     );
 
-    expect(wrapped).toStrictEqual(expectedWrapped as TRet<Uint8Array>);
-    expect(curve.unwrapKey(privateKey, wrapped, header)).toStrictEqual(transportedKey as TRet<Uint8Array>);
+    expect(wrapped).toStrictEqual(expectedWrapped);
+    expect(curve.unwrapKey(privateKey, wrapped, header)).toStrictEqual(transportedKey);
 }
 
 describe("[BIGN] Key transport", () => {

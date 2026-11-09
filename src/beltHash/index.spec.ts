@@ -9,8 +9,8 @@ import { hexToBytes, type TRet } from "@noble/hashes/utils.js";
 import { beltHash } from "./index";
 import { H } from "../belt/const";
 
-const performTest = (input: Uint8Array, expected: Uint8Array) =>
-    expect(beltHash(input)).toStrictEqual(expected as TRet<Uint8Array>);
+const performTest = (input: Uint8Array, expected: TRet<Uint8Array>) =>
+    expect(beltHash(input)).toStrictEqual(expected);
 
 describe("[CORE] BelT hash (STB 34.101.31)", () => {
     test("#1", () => performTest(

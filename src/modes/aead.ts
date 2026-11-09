@@ -3,7 +3,7 @@ import { mulC, xorBytes } from "../utils.js";
 import { Belt } from "../belt/index.js";
 import { H } from "../belt/const.js";
 import { ctr } from "./ctr.js";
-import { abytes, concatBytes, copyBytes, abool, equalBytes, numberToBytesLE, type TArg, type TRet } from "@noble/curves/utils.js";
+import { abytes, concatBytes, copyBytes, equalBytes, numberToBytesLE, type TArg, type TRet } from "@noble/curves/utils.js";
 import type { AEADMode } from "../types.js";
 
 const pad = (data: TArg<Uint8Array>): TRet<Uint8Array> => {
@@ -37,7 +37,6 @@ const dwp_che = (key: TArg<Uint8Array>, iv: TArg<Uint8Array>, isCHE: boolean): A
     abytes(key, undefined, "key");
     const cipher = new Belt(key);
     abytes(iv, cipher.blockSize, "iv");
-    abool(isCHE);
     const r = isCHE
         ? cipher.encrypt(iv)
         : cipher.encrypt(cipher.encrypt(iv));

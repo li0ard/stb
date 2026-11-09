@@ -4,10 +4,10 @@ import { hexToBytes, type TRet } from "@noble/hashes/utils.js";
 import { KEY1, KEY2, PT1, PT2 } from "./_test_utils.spec";
 import { wbl } from "./wbl";
 
-const performTest = (key: Uint8Array, pt: Uint8Array, ct: Uint8Array) => {
+const performTest = (key: Uint8Array, pt: TRet<Uint8Array>, ct: TRet<Uint8Array>) => {
     const mode = wbl(key);
-    expect(mode.encrypt(pt)).toStrictEqual(ct as TRet<Uint8Array>);
-    expect(mode.decrypt(ct)).toStrictEqual(pt as TRet<Uint8Array>);
+    expect(mode.encrypt(pt)).toStrictEqual(ct);
+    expect(mode.decrypt(ct)).toStrictEqual(pt);
 }
 
 describe("[MODE] WBL", () => {

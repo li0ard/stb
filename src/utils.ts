@@ -1,8 +1,8 @@
 import { abytes, anumber, type TArg, type TRet } from "@noble/hashes/utils.js";
 
 export const xorBytes = (a: TArg<Uint8Array>, b: TArg<Uint8Array>): TRet<Uint8Array> => {
-    const mlen = Math.min(a.length, b.length);
-    const result = new Uint8Array(mlen);
+    const mlen = Math.min(a.length, b.length),
+        result = new Uint8Array(mlen);
     for(let i = 0; i < mlen; i++) result[i] = a[i] ^ b[i];
 
     return result;
@@ -19,8 +19,8 @@ export const xorBytesInPlace = (
 }
 
 export const mulC = (block: TArg<Uint32Array>) => {
-    const msb = block[3] >>> 31;
-    const t = (~((msb - 1) >>> 0) & 0x87) >>> 0;
+    const msb = block[3] >>> 31,
+        t = (~((msb - 1) >>> 0) & 0x87) >>> 0;
     
     block[3] = ((block[3] << 1) ^ (block[2] >>> 31)) >>> 0;
     block[2] = ((block[2] << 1) ^ (block[1] >>> 31)) >>> 0;
@@ -30,7 +30,7 @@ export const mulC = (block: TArg<Uint32Array>) => {
 
 export const negBlock = (block: TArg<Uint8Array>): TRet<Uint8Array> => {
     const result = new Uint8Array(block.length);
-    for (let i = 0; i < block.length; i++) result[i] = ~block[i] & 0xFF;
+    for (let i = 0; i < block.length; i++) result[i] = ~block[i];
 
     return result;
 }

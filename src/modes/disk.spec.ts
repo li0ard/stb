@@ -7,23 +7,23 @@ import { H } from "../belt/const";
 const performTest = (
     key: Uint8Array,
     iv: Uint8Array,
-    pt: Uint8Array,
-    ct: Uint8Array
+    pt: TRet<Uint8Array>,
+    ct: TRet<Uint8Array>
 ) => {
     const mode = bde(key);
-    expect(mode.encrypt(pt, iv)).toStrictEqual(ct as TRet<Uint8Array>);
-    expect(mode.decrypt(ct, iv)).toStrictEqual(pt as TRet<Uint8Array>);
+    expect(mode.encrypt(pt, iv)).toStrictEqual(ct);
+    expect(mode.decrypt(ct, iv)).toStrictEqual(pt);
 }
 
 const performTest2 = (
     key: Uint8Array,
     iv: Uint8Array,
-    pt: Uint8Array,
-    ct: Uint8Array
+    pt: TRet<Uint8Array>,
+    ct: TRet<Uint8Array>
 ) => {
     const mode = sde(key);
-    expect(mode.encrypt(pt, iv)).toStrictEqual(ct as TRet<Uint8Array>);
-    expect(mode.decrypt(ct, iv)).toStrictEqual(pt as TRet<Uint8Array>);
+    expect(mode.encrypt(pt, iv)).toStrictEqual(ct);
+    expect(mode.decrypt(ct, iv)).toStrictEqual(pt);
 }
 
 

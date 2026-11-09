@@ -4,10 +4,10 @@ import { IV1, IV2, KEY1, KEY2, PT1 } from "./_test_utils.spec";
 import { ctr } from "./ctr";
 import { H } from "../belt/const";
 
-const performTest = (key: Uint8Array, iv: Uint8Array, pt: Uint8Array, ct: Uint8Array) => {
+const performTest = (key: Uint8Array, iv: Uint8Array, pt: TRet<Uint8Array>, ct: TRet<Uint8Array>) => {
     const mode = ctr(key, iv);
-    expect(mode.crypt(pt)).toStrictEqual(ct as TRet<Uint8Array>);
-    expect(mode.crypt(ct)).toStrictEqual(pt as TRet<Uint8Array>);
+    expect(mode.crypt(pt)).toStrictEqual(ct);
+    expect(mode.crypt(ct)).toStrictEqual(pt);
 }
 
 describe("[MODE] CTR", () => {

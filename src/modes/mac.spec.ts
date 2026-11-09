@@ -4,9 +4,9 @@ import { KEY1, PT1 } from "./_test_utils.spec";
 import { mac } from "./mac";
 import { H } from "../belt/const";
 
-const performTest = (key: Uint8Array, pt: Uint8Array, ct: Uint8Array) => {
+const performTest = (key: Uint8Array, pt: Uint8Array, ct: TRet<Uint8Array>) => {
     const mode = mac(key);
-    expect(mode.compute(pt)).toStrictEqual(ct as TRet<Uint8Array>);
+    expect(mode.compute(pt)).toStrictEqual(ct);
 }
 
 describe("[MODE] MAC", () => {

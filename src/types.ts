@@ -72,18 +72,20 @@ export type ECDSA = {
      * Signs a message hash with a secret key.
      * @param secretKey - Secret key bytes.
      * @param digest - Digest bytes.
+     * @param oid - OID of hash algorithm (default - BelT hash)
      * @param rand - Optional parameter for ephemeral key.
      * @returns Encoded signature bytes.
      */
-    sign:(secretKey: TArg<Uint8Array>, digest: TArg<Uint8Array>, rand?: TArg<Uint8Array>) => TRet<Uint8Array>;
+    sign:(secretKey: TArg<Uint8Array>, digest: TArg<Uint8Array>, oid?: TArg<Uint8Array>, rand?: TArg<Uint8Array>) => TRet<Uint8Array>;
     /**
      * Verifies a signature against message hash and public key.
      * @param publicKey - Public key
      * @param digest - Digest bytes
      * @param signature - Encoded signature bytes.
+     * @param oid - OID of hash algorithm (default - BelT hash)
      * @returns Whether the signature is valid.
      */
-    verify: (publicKey: TArg<Uint8Array>, digest: TArg<Uint8Array>, signature: TArg<Uint8Array>) => boolean;
+    verify: (publicKey: TArg<Uint8Array>, digest: TArg<Uint8Array>, signature: TArg<Uint8Array>, oid?: TArg<Uint8Array>) => boolean;
     /**
      * Wraps a secret key with a transport public key.
      * @param publicKey - Transport public key.
